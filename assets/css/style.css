@@ -146,21 +146,19 @@ input,textarea{font:inherit}
   max-width:var(--container);margin:0 auto;
 }
 
-/* Brand */
-.nav__brand{display:flex;align-items:center;gap:.75rem;color:var(--text)}
+/* Brand — logo bannière officiel (image SVG) */
+.nav__brand{display:flex;align-items:center;color:var(--text)}
 .nav__logo{
-  width:34px;height:auto;color:var(--green);
+  display:block;
+  height:38px;width:auto;
+  max-width:240px;
   transition:transform var(--t-base) var(--ease-out);
 }
-.nav__brand:hover .nav__logo{transform:rotate(-8deg) scale(1.05)}
-.nav__wordmark{display:flex;flex-direction:column;line-height:1}
-.nav__name{
-  font-family:var(--ff-display);font-weight:800;
-  font-size:1.05rem;letter-spacing:.04em;
-}
-.nav__tag{
-  font-family:var(--ff-mono);font-size:.62rem;letter-spacing:.18em;
-  color:var(--green);margin-top:3px;
+.nav__brand:hover .nav__logo{transform:scale(1.04)}
+.nav.is-scrolled .nav__logo{height:32px}
+@media (max-width: 720px){
+  .nav__logo{height:30px;max-width:160px}
+  .nav.is-scrolled .nav__logo{height:26px}
 }
 
 /* Menu desktop */
