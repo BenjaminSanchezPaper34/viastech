@@ -1,0 +1,35 @@
+# macOS
+.DS_Store
+._*
+.AppleDouble
+.LSOverride
+
+# iCloud
+.icloud
+*.icloud
+
+# Editors / IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+npm-debug.log*
+
+# Build artefacts (au cas où on ajoute un bundler plus tard)
+node_modules/
+dist/
+.cache/
+.parcel-cache/
+
+# Env / secrets
+.env
+.env.local
+.env.*.local
+
+# Backups
+*.bak
+*.tmp

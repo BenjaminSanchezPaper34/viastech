@@ -1,0 +1,14 @@
+/* TEAM */
+Garage : ViasTech
+Localisation : 2 Bis Rue de La Source, 34450 Vias (Hérault), France
+Contact : contact@viastech.fr
+Téléphone : 09 50 73 63 22
+
+/* SITE */
+Last update : 2026/04
+Standards : HTML5, CSS3, ES2022
+Components : GSAP 3, Lenis, schema.org
+Refonte : 2026 par Paper34 Web Studio
+
+/* THANKS */
+À toutes les voitures qui passent par l'atelier.

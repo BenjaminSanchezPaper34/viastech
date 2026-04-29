@@ -1,0 +1,13 @@
+{
+  "name": "ViasTech — Spécialiste mécanique & électronique automobile",
+  "short_name": "ViasTech",
+  "description": "Garage spécialiste véhicules allemands à Vias (Hérault).",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#07090A",
+  "theme_color": "#07090A",
+  "lang": "fr-FR",
+  "icons": [
+    { "src": "/assets/img/brand/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

@@ -1,0 +1,22 @@
+# Cloudflare Pages / Netlify redirects — ViasTech
+# Anciens chemins WordPress du site précédent → vers les ancres correspondantes
+
+/diagnostic                       /#expertise                           301
+/diagnostic/                      /#expertise                           301
+/mecanique                        /#expertise                           301
+/mecanique/                       /#expertise                           301
+/boite-automatique                /#expertise                           301
+/boite-automatique/               /#expertise                           301
+/boite-de-transfert               /#expertise                           301
+/boite-de-transfert/              /#expertise                           301
+/double-embrayage                 /#expertise                           301
+/double-embrayage/                /#expertise                           301
+/reprogrammation                  /#expertise                           301
+/reprogrammation/                 /#expertise                           301
+/atelier                          /#atelier                             301
+/atelier/                         /#atelier                             301
+/contact                          /#contact                             301
+/contact/                         /#contact                             301
+
+# 404 fallback
+/*                                /404.html                             404
