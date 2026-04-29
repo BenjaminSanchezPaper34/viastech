@@ -772,10 +772,12 @@ input,textarea{font:inherit}
 @media (max-width:980px){.atelier{grid-template-columns:1fr;gap:2.5rem}}
 
 .atelier__media{position:relative}
-.atelier__media > img{
-  width:100%;border-radius:var(--radius-lg);
-  aspect-ratio:4/5;object-fit:cover;
+.atelier__media > img,
+.atelier__media > .atelier__video{
+  display:block;width:100%;border-radius:var(--radius-lg);
+  aspect-ratio:4/5;object-fit:cover;object-position:center 40%;
   filter:contrast(1.05) saturate(.95);
+  background:var(--bg-2);
 }
 .atelier__media-2{
   position:absolute;bottom:-2rem;right:-2rem;width:55%;
@@ -1404,6 +1406,28 @@ html.reveal-fallback [data-reveal]{opacity:1 !important;transform:none !importan
     var(--bg-2);
   position:relative;border-bottom:1px solid var(--line);
 }
+.post-card__media--video{
+  background-size:cover;background-position:center 35%;
+  background-repeat:no-repeat;
+}
+.post-card__media--video::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent 40%,rgba(7,9,10,.7));
+}
+.post-card__play{
+  position:absolute;left:50%;top:50%;
+  transform:translate(-50%,-50%);
+  width:64px;height:64px;border-radius:50%;
+  background:rgba(7,9,10,.7);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,.18);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--green);
+  z-index:2;
+  transition:transform var(--t-base) var(--ease-out),
+             background var(--t-fast);
+}
+.post-card:hover .post-card__play{transform:translate(-50%,-50%) scale(1.08);background:rgba(7,9,10,.9)}
 .post-card__tag{
   position:absolute;top:1.2rem;left:1.2rem;
   font-family:var(--ff-mono);font-size:.7rem;letter-spacing:.08em;
@@ -1529,3 +1553,27 @@ html.reveal-fallback [data-reveal]{opacity:1 !important;transform:none !importan
 }
 .article-cta p{color:var(--text-2);margin:0 auto 1.5rem;max-width:50ch;line-height:1.55}
 .article-cta .vh-cta-actions{flex-direction:row;justify-content:center;flex-wrap:wrap}
+
+/* ============================================================
+   ARTICLE COVER VIDEO
+   ============================================================ */
+.article-cover-video{
+  margin:0 0 3rem;
+  border-radius:var(--radius-lg);
+  overflow:hidden;
+  border:1px solid var(--line);
+  background:var(--bg-2);
+  position:relative;
+  aspect-ratio:9/16;
+  max-height:80svh;
+  margin-inline:auto;
+  max-width:480px;
+}
+.article-video{
+  width:100%;height:100%;
+  object-fit:cover;
+  display:block;
+}
+@media (min-width:780px){
+  .article-cover-video{max-width:540px}
+}

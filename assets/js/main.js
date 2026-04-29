@@ -287,6 +287,58 @@
       });
     }
 
+    /* ── Video lazy-load (autres que hero) ───────────────── */
+    // Détection save-data / cellular
+    const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    const saveData = conn && (conn.saveData === true);
+    const slowConn = conn && /^(slow-2g|2g)$/.test(conn.effectiveType || '');
+
+    const lazyVideos = document.querySelectorAll('video[data-lazy-video]');
+    if (lazyVideos.length) {
+      if (reduce || saveData || slowConn) {
+        // On ne charge pas les vidéos : on garde le poster
+        lazyVideos.forEach((v) => v.removeAttribute('autoplay'));
+      } else {
+        const vidObs = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              const v = entry.target;
+              v.querySelectorAll('source[data-src]').forEach((s) => {
+                s.src = s.dataset.src;
+                s.removeAttribute('data-src');
+              });
+              v.load();
+              v.play().catch(() => {/* autoplay refusé : poster reste */});
+              vidObs.unobserve(v);
+            });
+          },
+          { threshold: 0.25, rootMargin: '0px 0px -10% 0px' }
+        );
+        lazyVideos.forEach((v) => vidObs.observe(v));
+      }
+    }
+
+    /* ── Hero video : pause hors écran pour économiser CPU ── */
+    const heroVid = document.querySelector('[data-hero-video]');
+    if (heroVid) {
+      if (reduce || saveData) {
+        heroVid.pause();
+        heroVid.removeAttribute('autoplay');
+      } else {
+        const heroObs = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) heroVid.play().catch(() => {});
+              else heroVid.pause();
+            });
+          },
+          { threshold: 0.05 }
+        );
+        heroObs.observe(heroVid);
+      }
+    }
+
     /* ── Footer year ─────────────────────────────────────── */
     document.querySelectorAll('[data-year]').forEach((y) => (y.textContent = new Date().getFullYear()));
 

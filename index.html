@@ -44,7 +44,7 @@
 <!-- Preconnect / Preload -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="preload" as="image" href="/assets/img/hero/hero-atelier.webp" fetchpriority="high" />
+<link rel="preload" as="image" href="/assets/img/video-posters/hero-poster.webp" fetchpriority="high" />
 <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/bricolagegrotesque/v3/3y9U6as8bTXq_nANBjzKo3IeZx8z6up5BeSl5jBNz_19PpbpMXuECpwUxJBOm_OJWiaaD30YfKfjZZoLvRvi.woff2" crossorigin />
 
 <!-- Fonts -->
@@ -230,10 +230,16 @@
 <!-- HERO -->
 <section class="hero" id="accueil">
   <div class="hero__media" aria-hidden="true">
-    <picture>
-      <source media="(max-width: 768px)" srcset="/assets/img/hero/hero-atelier-mobile.webp" />
-      <img src="/assets/img/hero/hero-atelier.webp" alt="" loading="eager" fetchpriority="high" />
-    </picture>
+    <video class="hero__video"
+           data-hero-video
+           autoplay muted loop playsinline disablepictureinpicture
+           preload="metadata"
+           poster="/assets/img/video-posters/hero-poster.webp">
+      <source data-mobile src="/assets/video/hero-mobile.webm" type="video/webm" media="(max-width: 768px)" />
+      <source data-mobile src="/assets/video/hero-mobile.mp4"  type="video/mp4"  media="(max-width: 768px)" />
+      <source src="/assets/video/hero-desktop.webm" type="video/webm" />
+      <source src="/assets/video/hero-desktop.mp4"  type="video/mp4" />
+    </video>
     <div class="hero__gradient"></div>
     <div class="hero__grain"></div>
   </div>
@@ -627,7 +633,15 @@
   <div class="container">
     <div class="atelier">
       <div class="atelier__media" data-reveal>
-        <img src="/assets/img/hero/atelier-1.webp" alt="L'atelier ViasTech à Vias dans l'Hérault" loading="lazy" />
+        <video class="atelier__video"
+               data-lazy-video
+               muted loop playsinline disablepictureinpicture
+               preload="none"
+               poster="/assets/img/video-posters/atelier-poster.webp"
+               aria-label="Vue de l'atelier ViasTech en activité">
+          <source data-src="/assets/video/atelier.webm" type="video/webm" />
+          <source data-src="/assets/video/atelier.mp4"  type="video/mp4" />
+        </video>
         <div class="atelier__media-2">
           <img src="/assets/img/hero/atelier-2.webp" alt="Mécanicien spécialiste véhicules allemands en intervention" loading="lazy" />
         </div>
