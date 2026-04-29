@@ -285,44 +285,33 @@ input,textarea{font:inherit}
   overflow:hidden;
 }
 
-/* Background flou (poster) : remplit toujours tout l'écran,
-   sert de remplissage des côtés sur desktop landscape (la vidéo est 9:16). */
-.hero__video-bg{
-  position:absolute;inset:-40px;
-  width:calc(100% + 80px);height:calc(100% + 80px);
-  object-fit:cover;object-position:center 35%;
-  filter:blur(36px) brightness(.45) saturate(.9);
-  transform:scale(1.08);
-  z-index:0;
-}
-
-/* Vidéo principale : full-screen sur mobile (portrait→portrait),
-   contain sur desktop landscape pour voir toute la vidéo, adossée au fond flou */
-.hero__video{
+/* Vidéo principale : remplit TOUT le viewport (cover) sur tous écrans.
+   La vidéo est portrait 1080×1920 — sur desktop landscape elle est croppée,
+   mais c'est l'effet voulu (vidéo full-bleed comme sur sites premium). */
+.hero__video,
+.hero__video-bg,
+.hero__media > img{
   position:absolute;inset:0;
   width:100%;height:100%;
   object-fit:cover;object-position:center 35%;
-  filter:brightness(.55) contrast(1.06) saturate(.92);
+  filter:brightness(.5) contrast(1.08) saturate(.92);
+}
+
+/* L'image bg sert de fallback rapide pendant que la vidéo charge,
+   et de fallback définitif si la vidéo échoue */
+.hero__video-bg{
+  z-index:0;
+  animation:heroZoom 24s ease-out forwards;
+  transform:scale(1.08);
+}
+.hero__video{
   z-index:1;
 }
-@media (min-width: 900px){
-  .hero__video{
-    object-fit:contain;
-    filter:brightness(.7) contrast(1.05) saturate(.95);
-  }
-}
+
 @media (prefers-reduced-motion: reduce){
   .hero__video{opacity:0}
 }
 
-/* Image fallback (sans-vidéo) — anciennes pages legacy */
-.hero__media > img:not(.hero__video-bg){
-  width:100%;height:100%;object-fit:cover;
-  filter:brightness(.45) contrast(1.1) saturate(.9);
-  transform:scale(1.08);
-  animation:heroZoom 24s ease-out forwards;
-  position:absolute;inset:0;z-index:0;
-}
 @keyframes heroZoom{from{transform:scale(1.18)}to{transform:scale(1)}}
 .hero__gradient{
   position:absolute;inset:0;
