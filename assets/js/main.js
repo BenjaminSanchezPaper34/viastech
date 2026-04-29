@@ -319,24 +319,50 @@
       }
     }
 
-    /* ── Hero video : pause hors écran pour économiser CPU ── */
+    /* ── Hero video : forcer play() de manière robuste ─────── */
     const heroVid = document.querySelector('[data-hero-video]');
     if (heroVid) {
-      if (reduce || saveData) {
-        heroVid.pause();
-        heroVid.removeAttribute('autoplay');
-      } else {
-        const heroObs = new IntersectionObserver(
-          (entries) => {
-            entries.forEach((entry) => {
-              if (entry.isIntersecting) heroVid.play().catch(() => {});
-              else heroVid.pause();
-            });
-          },
-          { threshold: 0.05 }
-        );
-        heroObs.observe(heroVid);
-      }
+      // Réduit motion / save-data : on respecte mais on tente quand même.
+      // L'utilisateur préfère voir une vidéo qui tourne — pause manuelle si besoin.
+      const tryPlay = () => {
+        if (heroVid.paused) {
+          heroVid.play().catch((err) => {
+            // Autoplay refusé (politique navigateur) — on retente après interaction
+            const onInteract = () => {
+              heroVid.play().catch(() => {});
+              ['click','touchstart','keydown','scroll'].forEach(e =>
+                document.removeEventListener(e, onInteract, { passive: true })
+              );
+            };
+            ['click','touchstart','keydown','scroll'].forEach(e =>
+              document.addEventListener(e, onInteract, { passive: true, once: true })
+            );
+          });
+        }
+      };
+
+      // Tentatives multiples pour assurer que la vidéo joue
+      heroVid.addEventListener('loadedmetadata', tryPlay, { once: true });
+      heroVid.addEventListener('canplay', tryPlay, { once: true });
+      heroVid.addEventListener('loadeddata', tryPlay, { once: true });
+
+      // Si la vidéo est déjà prête (cache navigateur), tenter direct
+      if (heroVid.readyState >= 2) tryPlay();
+
+      // Filet de sécurité après 2s
+      setTimeout(tryPlay, 2000);
+
+      // Pause hors écran (économie CPU/batterie) — uniquement si déjà en lecture
+      const heroObs = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) tryPlay();
+            else if (!heroVid.paused) heroVid.pause();
+          });
+        },
+        { threshold: 0.05 }
+      );
+      heroObs.observe(heroVid);
     }
 
     /* ── Footer year ─────────────────────────────────────── */
