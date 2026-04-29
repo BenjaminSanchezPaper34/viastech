@@ -32,7 +32,9 @@ Pour chaque véhicule (`/vehicules/<slug>/`), ajouter les vrais champs :
 ## ⚙️ Configuration
 
 - [ ] **FormSubmit.co** : à la première soumission, l'email recevra un lien d'activation à cliquer (sécurité anti-spam). Confirmer avec le gérant qu'il a bien cliqué.
-- [ ] **Hébergement** : choisir entre Cloudflare Pages, Netlify, ou hébergeur actuel
+- [x] **Hébergement** : Vercel (déploiement auto sur push `main`)
+- [ ] **Domaine** : connecter `viastech.fr` + `www.viastech.fr` dans Vercel → Settings → Domains
+- [ ] **DNS** : modifier les enregistrements chez le registrar avec ceux fournis par Vercel
 - [ ] **Email contact** : `contact@viastech.fr` est-il bien actif et consulté ?
 - [ ] **Réseaux sociaux** : YouTube et Facebook actifs ? Si oui, mettre à jour les liens du footer
 

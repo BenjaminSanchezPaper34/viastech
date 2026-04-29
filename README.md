@@ -40,24 +40,22 @@ python3 -m http.server 8765
 
 ## Déploiement
 
-### Recommandé : Cloudflare Pages
+### En cours : Vercel (recommandé pour ce projet)
 
-1. Créer un compte Cloudflare → Pages → "Create with direct upload"
-2. Uploader le dossier `site/` (ou connecter à un repo Git)
-3. Ajouter le domaine `viastech.fr` → Cloudflare gère DNS, HTTPS, CDN
-4. Les fichiers `_headers` et `_redirects` sont lus automatiquement
+Le repo est connecté à Vercel — chaque push sur `main` déclenche un déploiement automatique. La config est dans `vercel.json` (headers de sécurité, cache long sur les assets, redirections 301 depuis les anciennes URLs).
 
-Avantage : **gratuit, ultra-rapide, HTTPS auto, CDN mondial**.
+Pour brancher le domaine `viastech.fr` :
+1. Vercel → Project → Settings → Domains → Add `viastech.fr` et `www.viastech.fr`
+2. Vercel donne 2 enregistrements DNS à créer chez le registrar (généralement un A et un CNAME)
+3. Le SSL est généré automatiquement par Vercel sous 1–2 minutes
 
-### Alternative : Netlify
+### Alternatives compatibles
 
-Identique — drag & drop le dossier `site/` sur netlify.app.
+Le repo contient aussi :
+- **`_headers` / `_redirects`** : Cloudflare Pages, Netlify (lus automatiquement)
+- **`.htaccess`** : hébergeur Apache classique (OVH, o2switch, etc.) — upload FTP à la racine
 
-### Hébergeur classique (OVH, o2switch, etc.)
-
-Upload FTP du dossier `site/` à la racine `www/`. Configurer manuellement :
-- Redirections (utiliser `.htaccess` au lieu de `_redirects`)
-- Headers de sécurité (Apache : `mod_headers`)
+Vercel ignore `_headers`/`_redirects`/`.htaccess` et utilise uniquement `vercel.json`.
 
 ## Checklist post-mise en ligne
 
