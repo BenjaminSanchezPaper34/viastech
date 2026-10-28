@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+/*
+ * Tokens de la charte Viastech (site/DESIGN_SYSTEM.md, reprise par le DESIGN.md du parcours) :
+ * aucune couleur en dur ailleurs que dans ce bloc (et lib/brand.ts pour les e-mails).
+ */
+@theme {
+  --color-accent: #6bb534;
+  --color-bg: #07090a;
+  --color-surface: #11151a;
+  --color-border: #1f2630;
+  --color-text: #edeff2;
+  --color-muted: #a8afb8;
+  --color-danger: #ff5447;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-bricolage), var(--font-inter), ui-sans-serif, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+
+  --radius-choice: 14px;
+  --radius-button: 14px;
+
+  --animate-step-in: step-in 220ms ease-out both;
+
+  @keyframes step-in {
+    from {
+      opacity: 0;
+      transform: translateX(12px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+html {
+  color-scheme: dark;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+}
+
+/* Focus visible, épais et vert : utilisable au clavier comme au soleil. */
+:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+/* Trait vert signature de la charte : un seul par écran, entre le titre et le texte. */
+.line-mark {
+  display: block;
+  width: 64px;
+  height: 3px;
+  border-radius: 1px;
+  background: var(--color-accent);
+}
+
+/* Les écrans ne glissent qu'après une première action du visiteur (voir E85Flow). */
+:not([data-animate]) > main .animate-step-in {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

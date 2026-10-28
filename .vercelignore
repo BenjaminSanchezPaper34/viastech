@@ -1,0 +1,3 @@
+# Le parcours E85 (Next.js) est un projet Vercel distinct (Root Directory e85) :
+# ses sources ne doivent pas être publiées par le site statique.
+e85/
