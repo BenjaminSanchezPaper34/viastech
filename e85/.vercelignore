@@ -1,0 +1,4 @@
+# Propre au projet Vercel viastech-e85 (Root Directory e85) : remplace celui de la racine du dépôt,
+# qui exclut e85/ pour le site statique.
+.data
+.env*.local
