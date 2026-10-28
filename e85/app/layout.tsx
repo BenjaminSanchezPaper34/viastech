@@ -12,6 +12,10 @@ const jetbrains = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500"], v
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.APP_URL ?? "http://localhost:3000"),
+  // Préversion en *.vercel.app : noindex jusqu'au branchement de e85.viastech.fr (APP_URL).
+  ...(new URL(process.env.APP_URL ?? "http://localhost").hostname.endsWith(".vercel.app") && {
+    robots: { index: false, follow: false },
+  }),
   title: "Garage Viastech à Vias",
   description: "Garage Viastech, spécialiste véhicules allemands à Vias.",
 };
