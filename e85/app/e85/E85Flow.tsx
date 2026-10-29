@@ -38,8 +38,8 @@ const PROGRESS: Record<Step, number> = {
 };
 const STEP_LABEL: Record<Step, string> = {
   accueil: "",
-  vehicule: "Votre véhicule",
-  sortie: "Votre véhicule",
+  vehicule: "Véhicule",
+  sortie: "Véhicule",
   points: "Points particuliers",
   creneau: "Créneau",
   contact: "Coordonnées",
