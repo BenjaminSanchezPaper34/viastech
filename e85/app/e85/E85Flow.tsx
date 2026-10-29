@@ -9,6 +9,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { BookingSummary } from "@/components/booking/BookingSummary";
 import { ChoiceButtons } from "@/components/booking/ChoiceButtons";
+import { HeroVideo } from "@/components/booking/HeroVideo";
 import { TextArea, TextField } from "@/components/booking/Field";
 import { SlotPicker } from "@/components/booking/SlotPicker";
 import { PrimaryButton, SecondaryLink, StepLayout } from "@/components/booking/StepLayout";
@@ -286,6 +287,7 @@ export function E85Flow() {
       screen = (
         <StepLayout
           stepKey="accueil"
+          hero={<HeroVideo />}
           kicker="Bioéthanol E85"
           title="Passez à l'E85 avec Viastech"
           action={
@@ -617,7 +619,7 @@ export function E85Flow() {
   const showFooter = s.step === "accueil" || s.step === "sortie" || s.step === "confirme";
 
   return (
-    <div className="flex flex-1 flex-col" data-animate={navigated ? "" : undefined}>
+    <div className="relative flex flex-1 flex-col" data-animate={navigated ? "" : undefined}>
       <Stepper current={PROGRESS[s.step]} total={5} onBack={back} />
       {screen}
       {showFooter && <Footer />}

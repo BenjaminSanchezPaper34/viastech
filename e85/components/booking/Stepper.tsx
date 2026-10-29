@@ -13,9 +13,10 @@ export function Stepper({ current, total, onBack }: Props) {
   const headerClass = "sticky top-0 z-20 bg-bg/95 px-4 pb-3 backdrop-blur-sm";
   const headerStyle = { paddingTop: "calc(env(safe-area-inset-top) + 10px)" };
 
+  // Accueil : symbole seul, posé en transparence sur la vidéo.
   if (current === 0) {
     return (
-      <header className={headerClass} style={headerStyle}>
+      <header className="absolute inset-x-0 top-0 z-20 px-4 pb-3" style={headerStyle}>
         <div className="mx-auto flex h-11 max-w-lg items-center justify-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/brand/viastech-symbole-blanc.svg" alt="Viastech" width={31} height={26} className="h-[26px] w-auto" />
