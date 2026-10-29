@@ -67,16 +67,16 @@ export function RecapTicket({ slotStart, blockHours, plate, address, price, offe
         </div>
         <div className="flex items-start justify-between gap-3">
           <dt className="pt-0.5 text-sm text-muted">Adresse</dt>
-          <dd className="flex items-start gap-1.5 text-right text-sm text-text">
-            <span className="mt-0.5 text-accent">
-              <PinIcon size={16} />
-            </span>
-            {/* Rue sur une ligne, zone et ville sur la suivante : jamais de coupure au milieu d'un nom. */}
-            <span>
+          {/* Rue sur une ligne (épingle collée devant), zone et ville sur la suivante : jamais de coupure au milieu d'un nom. */}
+          <dd className="text-right text-sm text-text">
+            <span className="inline-flex items-center gap-1.5">
+              <span className="text-accent">
+                <PinIcon size={16} />
+              </span>
               {street}
-              <br />
-              {rest}
             </span>
+            <br />
+            {rest}
           </dd>
         </div>
         <div className="flex items-baseline justify-between gap-3 border-t border-border pt-3">
