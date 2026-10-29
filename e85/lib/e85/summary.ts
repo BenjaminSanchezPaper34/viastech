@@ -7,7 +7,8 @@ import { e85Service, labelOf } from "./service";
 import type { E85Request } from "./types";
 import { formatMobile } from "./validate";
 
-export const vehicleTitle = (r: E85Request) => `${r.vehicle.brand} ${r.vehicle.model}`.trim();
+/** Le véhicule est identifié par son immatriculation (le garage en tire marque et modèle). */
+export const vehicleTitle = (r: E85Request) => r.vehicle.plate;
 export const fullName = (r: E85Request) => `${r.contact.firstName} ${r.contact.lastName}`.trim();
 
 export function eventTitle(r: E85Request) {
@@ -18,7 +19,7 @@ export function slotEnd(start: Date) {
   return new Date(start.getTime() + bookingRules.blockHours * 3_600_000);
 }
 
-/** Réponses de l'étape « état du véhicule », avec un repère sur celles qui méritent attention. */
+/** Points particuliers déclarés par le client, avec un repère sur ceux qui méritent attention. */
 export function checkLines(r: E85Request) {
   return e85Service.checks.map((q) => {
     const value = r.checks[q.id];
@@ -29,11 +30,8 @@ export function checkLines(r: E85Request) {
 export function vehicleLines(r: E85Request): [string, string][] {
   const v = r.vehicle;
   return [
-    ["Véhicule", `${labelOf(e85Service.vehicleTypes, v.type)} ${vehicleTitle(r)}`],
-    ["Année", v.year],
-    ["Motorisation", v.engine],
-    ["Carburant actuel", labelOf(e85Service.fuels, v.fuel)],
     ["Immatriculation", v.plate],
+    ["Carburant actuel", labelOf(e85Service.fuels, v.fuel)],
     ["Kilométrage", `${Number(v.mileage).toLocaleString("fr-FR")} km`],
   ];
 }
@@ -49,8 +47,8 @@ export function eventDescription(r: E85Request) {
     "",
     ...vehicleLines(r).map(([k, v]) => `${k} : ${v}`),
     "",
-    "État du véhicule :",
-    ...checkLines(r).map((c) => `${c.attention ? "⚠ " : "- "}${c.label} ${c.answer}`),
+    "Points particuliers :",
+    ...checkLines(r).map((c) => `${c.attention ? "⚠ " : "- "}${c.label} : ${c.answer}`),
   ];
   if (r.remark) lines.push("", `Remarque : ${r.remark}`);
   if (r.slotStart) lines.push("", `Dépôt : ${formatSlot(new Date(r.slotStart))}`);

@@ -65,7 +65,7 @@ export default async function CancelPage({ searchParams }: Props) {
         <BookingSummary
           rows={[
             ["Dépôt", formatSlot(new Date(r.slotStart!))],
-            ["Véhicule", vehicleTitle(r)],
+            ["Immatriculation", vehicleTitle(r)],
             ["Adresse", garageAddressLine],
           ]}
         />

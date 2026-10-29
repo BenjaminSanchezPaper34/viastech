@@ -101,7 +101,7 @@ export default async function AdminPage() {
                   <div>
                     <dt className="inline text-muted">Véhicule : </dt>
                     <dd className="inline">
-                      {vehicleTitle(r)} {r.vehicle.year}, {r.vehicle.engine}, {r.vehicle.plate}, {Number(r.vehicle.mileage).toLocaleString("fr-FR")} km
+                      {vehicleTitle(r)}, {Number(r.vehicle.mileage).toLocaleString("fr-FR")} km
                     </dd>
                   </div>
                   <div>
@@ -117,7 +117,7 @@ export default async function AdminPage() {
                   {flagged.length > 0 && (
                     <div>
                       <dt className="inline text-muted">À vérifier : </dt>
-                      <dd className="inline text-danger">{flagged.map((c) => `${c.label} ${c.answer}`).join(" · ")}</dd>
+                      <dd className="inline text-danger">{flagged.map((c) => c.label).join(" · ")}</dd>
                     </div>
                   )}
                   {r.remark && (

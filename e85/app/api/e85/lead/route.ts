@@ -1,7 +1,6 @@
 /**
- * Étape « coordonnées » : enregistre la demande avant le choix du créneau.
- * Le garage voit ainsi aussi ceux qui abandonnent au calendrier, et peut les rappeler
- * (ils ont coché la case de recontact).
+ * Dernier écran : enregistre la demande (véhicule, points, coordonnées) juste avant de réserver
+ * le créneau. Si la réservation échoue, la demande reste visible dans l'admin « Sans créneau ».
  */
 import { getStore } from "@/lib/store";
 import { isExitVehicle, hasErrors, normalizeMobile, normalizePlate, validateChecks, validateContact, validateVehicle } from "@/lib/e85/validate";
@@ -20,12 +19,7 @@ export async function POST(req: Request) {
   }
 
   const vehicle: Vehicle = {
-    type: clip(body.vehicle?.type, 20),
     fuel: clip(body.vehicle?.fuel, 20),
-    brand: clip(body.vehicle?.brand, 40),
-    model: clip(body.vehicle?.model, 60),
-    year: clip(body.vehicle?.year, 4),
-    engine: clip(body.vehicle?.engine, 60),
     plate: normalizePlate(clip(body.vehicle?.plate, 15)),
     mileage: clip(body.vehicle?.mileage, 10).replace(/\D/g, ""),
   };
@@ -35,7 +29,6 @@ export async function POST(req: Request) {
     lastName: clip(body.contact?.lastName, 60),
     phone: clip(body.contact?.phone, 25),
     email: clip(body.contact?.email, 120).toLowerCase(),
-    consent: body.contact?.consent === true,
   };
 
   const errors = { ...validateVehicle(vehicle), ...validateChecks(checks), ...validateContact(contact) };
@@ -51,7 +44,7 @@ export async function POST(req: Request) {
     vehicle,
     checks,
     remark: clip(body.remark, 500),
-    contact: { ...contact, phone: normalizeMobile(contact.phone)!, consentAt: new Date().toISOString() },
+    contact: { ...contact, phone: normalizeMobile(contact.phone)! },
     utm,
   });
   return Response.json({ id: saved.id });

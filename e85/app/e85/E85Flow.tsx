@@ -1,13 +1,15 @@
 "use client";
 /**
- * Parcours de réservation E85, un écran par étape.
+ * Parcours de réservation E85, un écran par étape, réduit au strict nécessaire :
+ * carburant + plaque + kilométrage, points particuliers (un tap si « Aucun »), créneau,
+ * puis coordonnées et confirmation sur le même écran.
  * Les saisies sont gardées dans sessionStorage : un rechargement ou un retour arrière
  * du téléphone ne fait rien perdre. Le bouton retour du navigateur suit les étapes.
  */
 import { useCallback, useEffect, useState } from "react";
 import { BookingSummary } from "@/components/booking/BookingSummary";
 import { ChoiceButtons } from "@/components/booking/ChoiceButtons";
-import { SelectField, TextArea, TextField } from "@/components/booking/Field";
+import { TextArea, TextField } from "@/components/booking/Field";
 import { SlotPicker } from "@/components/booking/SlotPicker";
 import { PrimaryButton, SecondaryLink, StepLayout } from "@/components/booking/StepLayout";
 import { Stepper } from "@/components/booking/Stepper";
@@ -16,35 +18,34 @@ import { bookingRules } from "@/lib/config/booking";
 import { garageAddressLine, mapsUrl, whatsappUrl } from "@/lib/config/garage";
 import { e85Service } from "@/lib/e85/service";
 import type { Checks, Contact, SlotDay, Vehicle } from "@/lib/e85/types";
-import { hasErrors, isExitVehicle, normalizePlate, validateChecks, validateContact, validateVehicle, type Errors } from "@/lib/e85/validate";
+import { hasErrors, isExitVehicle, normalizePlate, validateContact, validateVehicle, type Errors } from "@/lib/e85/validate";
 import { track } from "@/lib/track";
 
-type Step = "accueil" | "vehicule" | "sortie" | "etat" | "contact" | "creneau" | "recap" | "confirme";
+type Step = "accueil" | "vehicule" | "sortie" | "points" | "creneau" | "contact" | "confirme";
 
 const PROGRESS: Record<Step, number> = {
   accueil: 1,
   vehicule: 2,
   sortie: 2,
-  etat: 3,
-  contact: 4,
-  creneau: 5,
-  recap: 5,
+  points: 3,
+  creneau: 4,
+  contact: 5,
   confirme: 6,
 };
 const PREVIOUS: Partial<Record<Step, Step>> = {
   vehicule: "accueil",
   sortie: "vehicule",
-  etat: "vehicule",
-  contact: "etat",
-  creneau: "contact",
-  recap: "creneau",
+  points: "vehicule",
+  creneau: "points",
+  contact: "creneau",
 };
 
 type State = {
   step: Step;
   vehicle: Vehicle;
-  brandChoice: string;
-  checks: Checks;
+  /** Points cochés ; null tant que le client n'a pas répondu (« Aucun » = tableau vide). */
+  points: string[] | null;
+  showRemark: boolean;
   remark: string;
   contact: Contact;
   utm: Record<string, string>;
@@ -56,11 +57,11 @@ type State = {
 
 const INITIAL: State = {
   step: "accueil",
-  vehicle: { type: "", fuel: "", brand: "", model: "", year: "", engine: "", plate: "", mileage: "" },
-  brandChoice: "",
-  checks: {},
+  vehicle: { fuel: "", plate: "", mileage: "" },
+  points: null,
+  showRemark: false,
   remark: "",
-  contact: { firstName: "", lastName: "", phone: "", email: "", consent: false },
+  contact: { firstName: "", lastName: "", phone: "", email: "" },
   utm: {},
   requestId: null,
   selectedDate: null,
@@ -68,9 +69,12 @@ const INITIAL: State = {
   icsUrl: null,
 };
 
-const STORAGE = "viastech-e85";
-const OTHER = "Autre";
-const YEARS = Array.from({ length: new Date().getFullYear() + 1 - 1990 + 1 }, (_, i) => String(new Date().getFullYear() + 1 - i));
+// Version dans la clé : une saisie gardée par l'ancien parcours (autres champs) n'est pas reprise.
+const STORAGE = "viastech-e85-v2";
+
+/** Les points cochés deviennent des réponses oui / non, la forme lue par l'agenda, les e-mails et l'admin. */
+const toChecks = (points: string[]): Checks =>
+  Object.fromEntries(e85Service.checks.map((q) => [q.id, points.includes(q.id) ? "oui" : "non"]));
 
 const slotDate = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", weekday: "long", day: "numeric", month: "long" });
 const slotHour = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", hour: "2-digit", minute: "2-digit" });
@@ -168,8 +172,8 @@ export function E85Flow() {
   const setVehicle = (p: Partial<Vehicle>) => {
     const vehicle = { ...s.vehicle, ...p };
     patch({ vehicle });
-    if (("type" in p || "fuel" in p) && isExitVehicle(vehicle)) {
-      track("e85_sortie", { type: vehicle.type, carburant: vehicle.fuel });
+    if ("fuel" in p && isExitVehicle(vehicle)) {
+      track("e85_sortie", { carburant: vehicle.fuel });
       goTo("sortie");
     }
   };
@@ -188,53 +192,58 @@ export function E85Flow() {
     const e = validateVehicle(s.vehicle);
     setErrors(e);
     if (hasErrors(e)) return;
-    track("e85_vehicule", { marque: s.vehicle.brand });
-    goTo("etat");
+    track("e85_vehicule");
+    goTo("points");
   };
 
-  const submitChecks = () => {
-    const e = validateChecks(s.checks);
-    setErrors(e);
-    if (!hasErrors(e)) goTo("contact");
+  const openSlots = () => {
+    if (s.points === null) {
+      setErrors({ checks: "Cochez les points qui vous concernent, ou « Aucun »." });
+      return;
+    }
+    goTo("creneau");
   };
 
-  const submitContact = async () => {
+  const togglePoint = (id: string) => {
+    const current = s.points ?? [];
+    patch({ points: current.includes(id) ? current.filter((p) => p !== id) : [...current, id] });
+    setErrors({});
+  };
+
+  /** Dernier écran : enregistre la demande puis réserve le créneau, en un seul geste pour le client. */
+  const confirm = async () => {
     const e = validateContact(s.contact);
     setErrors(e);
-    if (hasErrors(e)) return;
-    setLoading(true);
-    try {
-      const res = await fetch("/api/e85/lead", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: s.requestId, vehicle: s.vehicle, checks: s.checks, remark: s.remark, contact: s.contact, utm: s.utm }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setErrors(data.errors ?? {});
-        setNotice("Vérifiez les informations saisies.");
-        return;
-      }
-      patch({ requestId: data.id });
-      track("e85_lead");
-      setDays(null);
-      goTo("creneau");
-    } catch {
-      setNotice("Connexion impossible. Vérifiez votre réseau et réessayez.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const confirm = async () => {
-    if (!s.requestId || !s.slotStart) return;
+    if (hasErrors(e) || !s.slotStart) return;
     setLoading(true);
     setNotice(null);
     try {
+      const lead = await fetch("/api/e85/lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: s.requestId,
+          vehicle: s.vehicle,
+          checks: toChecks(s.points ?? []),
+          remark: s.remark,
+          contact: s.contact,
+          utm: s.utm,
+        }),
+      });
+      const leadData = await lead.json();
+      if (!lead.ok) {
+        setErrors(leadData.errors ?? {});
+        setNotice("Vérifiez les informations saisies.");
+        return;
+      }
+      const requestId: string = leadData.id;
+      patch({ requestId });
+      track("e85_lead");
+
       const res = await fetch("/api/e85/book", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: s.requestId, slotStart: s.slotStart }),
+        body: JSON.stringify({ id: requestId, slotStart: s.slotStart }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -247,9 +256,10 @@ export function E85Flow() {
         return;
       }
       if (data.error === "slot_taken") {
-        patch({ slotStart: null, selectedDate: null, step: "creneau" });
+        patch({ slotStart: null, selectedDate: null });
         setDays(null);
-        setNotice("Ce créneau vient d'être réservé par quelqu'un d'autre. Choisissez-en un autre, il ne vous faudra que quelques secondes.");
+        goTo("creneau");
+        setNotice("Ce créneau vient d'être réservé par quelqu'un d'autre. Choisissez-en un autre, vos informations sont gardées.");
         return;
       }
       setNotice("La réservation n'a pas abouti. Réessayez, ou écrivez-nous sur WhatsApp : nous vous trouvons un créneau.");
@@ -312,68 +322,15 @@ export function E85Flow() {
         <StepLayout
           stepKey="vehicule"
           title="Votre véhicule"
-          intro="Pour vérifier qu'il est compatible avec l'E85."
+          intro="Votre immatriculation nous suffit pour vérifier la compatibilité."
           action={<PrimaryButton onClick={submitVehicle}>Continuer</PrimaryButton>}
         >
           <ChoiceButtons
-            label="Type de véhicule"
-            options={e85Service.vehicleTypes}
-            value={s.vehicle.type}
-            onChange={(type) => setVehicle({ type })}
-            error={errors.type}
-            columns={3}
-          />
-          <ChoiceButtons
-            label="Carburant actuel"
+            label="Il roule à quel carburant ?"
             options={e85Service.fuels}
             value={s.vehicle.fuel}
             onChange={(fuel) => setVehicle({ fuel })}
             error={errors.fuel}
-          />
-          <SelectField
-            label="Marque"
-            placeholder="Choisir la marque"
-            options={[...e85Service.brands, OTHER]}
-            value={s.brandChoice}
-            onChange={(e) => {
-              const v = e.target.value;
-              patch({ brandChoice: v, vehicle: { ...s.vehicle, brand: v === OTHER ? "" : v } });
-            }}
-            error={s.brandChoice === OTHER ? undefined : errors.brand}
-          />
-          {s.brandChoice === OTHER && (
-            <TextField
-              label="Quelle marque ?"
-              value={s.vehicle.brand}
-              onChange={(e) => setVehicle({ brand: e.target.value })}
-              error={errors.brand}
-              autoComplete="off"
-            />
-          )}
-          <TextField
-            label="Modèle"
-            placeholder="Golf, Série 1, A3…"
-            value={s.vehicle.model}
-            onChange={(e) => setVehicle({ model: e.target.value })}
-            error={errors.model}
-            autoComplete="off"
-          />
-          <SelectField
-            label="Année"
-            placeholder="Choisir l'année"
-            options={YEARS}
-            value={s.vehicle.year}
-            onChange={(e) => setVehicle({ year: e.target.value })}
-            error={errors.year}
-          />
-          <TextField
-            label="Motorisation"
-            placeholder="1.4 TSI 150 ch"
-            help="Elle figure sur la carte grise ou le carnet d'entretien."
-            value={s.vehicle.engine}
-            onChange={(e) => setVehicle({ engine: e.target.value })}
-            error={errors.engine}
-            autoComplete="off"
           />
           <TextField
             label="Immatriculation"
@@ -401,11 +358,7 @@ export function E85Flow() {
         <StepLayout
           stepKey="sortie"
           title="La conversion E85 concerne les voitures essence"
-          intro={
-            s.vehicle.type === "moto"
-              ? "Nous ne convertissons pas les motos."
-              : (e85Service.exitMessages[s.vehicle.fuel] ?? "La réservation en ligne n'est pas possible pour ce véhicule.")
-          }
+          intro={e85Service.exitMessages[s.vehicle.fuel] ?? "La réservation en ligne n'est pas possible pour ce véhicule."}
           action={
             <div className="space-y-2">
               <PrimaryButton
@@ -419,7 +372,7 @@ export function E85Flow() {
               <button
                 type="button"
                 onClick={() => {
-                  patch({ vehicle: { ...s.vehicle, type: s.vehicle.type === "moto" ? "" : s.vehicle.type, fuel: "" } });
+                  patch({ vehicle: { ...s.vehicle, fuel: "" } });
                   history.back();
                 }}
                 className="min-h-12 w-full text-base text-muted underline underline-offset-4"
@@ -436,104 +389,72 @@ export function E85Flow() {
       );
       break;
 
-    case "etat":
+    case "points": {
+      const chosen = s.points ?? [];
+      const tile = (on: boolean) =>
+        `flex min-h-[52px] w-full items-center justify-center rounded-[var(--radius-choice)] border px-3 text-center text-base transition-colors duration-150 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-accent ${
+          on ? "border-accent bg-accent font-semibold text-bg" : "border-border bg-surface text-text active:border-muted"
+        }`;
       screen = (
         <StepLayout
-          stepKey="etat"
-          title="L'état de votre véhicule"
-          intro="Quelques questions pour préparer la pose."
-          action={<PrimaryButton onClick={submitChecks}>Continuer</PrimaryButton>}
-        >
-          {e85Service.checks.map((q) => (
-            <ChoiceButtons
-              key={q.id}
-              label={q.label}
-              help={q.help}
-              options={q.choices}
-              value={s.checks[q.id]}
-              onChange={(v) => patch({ checks: { ...s.checks, [q.id]: v } })}
-              error={errors[q.id]}
-              columns={q.choices.length === 3 ? 3 : 2}
-            />
-          ))}
-          <TextArea
-            label="Remarque (facultatif)"
-            placeholder="Un bruit, un voyant, une question…"
-            value={s.remark}
-            maxLength={500}
-            onChange={(e) => patch({ remark: e.target.value })}
-          />
-        </StepLayout>
-      );
-      break;
-
-    case "contact":
-      screen = (
-        <StepLayout
-          stepKey="contact"
-          title="Vos coordonnées"
-          intro="Pour vous confirmer le rendez-vous."
+          stepKey="points"
+          title="Un de ces points vous concerne ?"
+          intro="Cochez ceux qui s'appliquent à votre véhicule. Le reste, nous le vérifions à l'atelier."
           action={
-            <PrimaryButton onClick={submitContact} loading={loading}>
-              Voir les créneaux disponibles
-            </PrimaryButton>
+            chosen.length > 0 ? <PrimaryButton onClick={openSlots}>Voir les créneaux</PrimaryButton> : undefined
           }
         >
-          {Notice}
-          <TextField
-            label="Prénom"
-            autoComplete="given-name"
-            value={s.contact.firstName}
-            onChange={(e) => patch({ contact: { ...s.contact, firstName: e.target.value } })}
-            error={errors.firstName}
-          />
-          <TextField
-            label="Nom"
-            autoComplete="family-name"
-            value={s.contact.lastName}
-            onChange={(e) => patch({ contact: { ...s.contact, lastName: e.target.value } })}
-            error={errors.lastName}
-          />
-          <TextField
-            label="Téléphone mobile"
-            type="tel"
-            inputMode="tel"
-            autoComplete="tel"
-            placeholder="06 12 34 56 78"
-            value={s.contact.phone}
-            onChange={(e) => patch({ contact: { ...s.contact, phone: e.target.value } })}
-            error={errors.phone}
-          />
-          <TextField
-            label="E-mail"
-            type="email"
-            inputMode="email"
-            autoComplete="email"
-            placeholder="vous@exemple.fr"
-            value={s.contact.email}
-            onChange={(e) => patch({ contact: { ...s.contact, email: e.target.value } })}
-            error={errors.email}
-          />
-          <label className="mt-2 flex cursor-pointer items-start gap-3 py-2 text-base">
-            <input
-              type="checkbox"
-              checked={s.contact.consent}
-              onChange={(e) => patch({ contact: { ...s.contact, consent: e.target.checked } })}
-              className="mt-0.5 size-6 shrink-0 accent-accent"
-              aria-invalid={!!errors.consent}
+          <fieldset className="mb-6" aria-describedby={errors.checks ? "points-err" : undefined}>
+            <legend className="sr-only">Points particuliers</legend>
+            <div className="grid gap-2">
+              {e85Service.checks.map((q) => {
+                const on = chosen.includes(q.id);
+                return (
+                  <button key={q.id} type="button" aria-pressed={on} onClick={() => togglePoint(q.id)} className={tile(on)}>
+                    {q.label}
+                  </button>
+                );
+              })}
+              <button
+                type="button"
+                aria-pressed={s.points !== null && chosen.length === 0}
+                onClick={() => {
+                  // « Aucun » : le cas le plus courant passe directement au calendrier.
+                  patch({ points: [] });
+                  goTo("creneau");
+                }}
+                className={`${tile(s.points !== null && chosen.length === 0)} mt-2`}
+              >
+                Aucun, voir les créneaux
+              </button>
+            </div>
+            {errors.checks && (
+              <p id="points-err" className="mt-2 text-sm text-danger">
+                {errors.checks}
+              </p>
+            )}
+          </fieldset>
+          {s.showRemark || s.remark ? (
+            <TextArea
+              label="Une précision (facultatif)"
+              placeholder="Un bruit, une question…"
+              value={s.remark}
+              maxLength={500}
+              onChange={(e) => patch({ remark: e.target.value })}
             />
-            <span>J&apos;accepte d&apos;être recontacté par Viastech au sujet de ma demande</span>
-          </label>
-          {errors.consent && <p className="text-sm text-danger">{errors.consent}</p>}
-          <p className="mt-3 text-sm text-muted">
-            Vos données servent uniquement à traiter votre demande.{" "}
-            <a href="/confidentialite" className="underline underline-offset-2">
-              En savoir plus
-            </a>
-          </p>
+          ) : (
+            <button
+              type="button"
+              onClick={() => patch({ showRemark: true })}
+              className="min-h-11 text-base text-muted underline underline-offset-4"
+            >
+              Ajouter une précision
+            </button>
+          )}
         </StepLayout>
       );
       break;
+    }
 
     case "creneau":
       screen = (
@@ -542,7 +463,7 @@ export function E85Flow() {
           title="Choisissez votre créneau"
           intro={`Vous déposez votre véhicule à l'heure choisie. Comptez environ ${bookingRules.blockHours} h de pose.`}
           action={
-            <PrimaryButton disabled={!s.slotStart} onClick={() => goTo("recap")}>
+            <PrimaryButton disabled={!s.slotStart} onClick={() => goTo("contact")}>
               {s.slotStart ? `Continuer avec le ${fmtDate(s.slotStart)} à ${fmtHour(s.slotStart)}` : "Choisissez un jour et une heure"}
             </PrimaryButton>
           }
@@ -588,11 +509,12 @@ export function E85Flow() {
       );
       break;
 
-    case "recap":
+    case "contact":
       screen = (
         <StepLayout
-          stepKey="recap"
-          title="Vérifiez et confirmez"
+          stepKey="contact"
+          title="Vos coordonnées"
+          intro="Dernière étape : nous vous envoyons la confirmation."
           action={
             <PrimaryButton onClick={confirm} loading={loading}>
               Confirmer mon rendez-vous
@@ -600,19 +522,60 @@ export function E85Flow() {
           }
         >
           {Notice}
-          <BookingSummary
-            price={e85Service.priceLabel}
-            priceNote={`Conversion E85, ${e85Service.offer}`}
-            rows={[
-              ["Dépôt", <strong key="d">{`${fmtDate(s.slotStart!)} à ${fmtHour(s.slotStart!)}`}</strong>],
-              ["Véhicule", `${s.vehicle.brand} ${s.vehicle.model}, ${s.vehicle.year}`],
-              ["Motorisation", s.vehicle.engine],
-              ["Immatriculation", normalizePlate(s.vehicle.plate)],
-              ["Contact", `${s.contact.firstName} ${s.contact.lastName}`],
-              ["Adresse", garageAddressLine],
-            ]}
-            footer="Vous recevez une confirmation par e-mail, puis un rappel la veille."
+          {s.slotStart && (
+            <div className="mb-6">
+              <BookingSummary
+                price={e85Service.priceLabel}
+                priceNote={`Conversion E85, ${e85Service.offer}`}
+                rows={[
+                  ["Dépôt", <strong key="d">{`${fmtDate(s.slotStart)} à ${fmtHour(s.slotStart)}`}</strong>],
+                  ["Immatriculation", normalizePlate(s.vehicle.plate)],
+                  ["Adresse", garageAddressLine],
+                ]}
+              />
+            </div>
+          )}
+          <TextField
+            label="Prénom"
+            autoComplete="given-name"
+            value={s.contact.firstName}
+            onChange={(e) => patch({ contact: { ...s.contact, firstName: e.target.value } })}
+            error={errors.firstName}
           />
+          <TextField
+            label="Nom"
+            autoComplete="family-name"
+            value={s.contact.lastName}
+            onChange={(e) => patch({ contact: { ...s.contact, lastName: e.target.value } })}
+            error={errors.lastName}
+          />
+          <TextField
+            label="Téléphone mobile"
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel"
+            placeholder="06 12 34 56 78"
+            value={s.contact.phone}
+            onChange={(e) => patch({ contact: { ...s.contact, phone: e.target.value } })}
+            error={errors.phone}
+          />
+          <TextField
+            label="E-mail"
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            placeholder="vous@exemple.fr"
+            value={s.contact.email}
+            onChange={(e) => patch({ contact: { ...s.contact, email: e.target.value } })}
+            error={errors.email}
+          />
+          <p className="mt-1 text-sm text-muted">
+            Vous recevez la confirmation par e-mail, puis un rappel la veille. Vos coordonnées servent uniquement à ce
+            rendez-vous.{" "}
+            <a href="/confidentialite" className="underline underline-offset-2">
+              En savoir plus
+            </a>
+          </p>
         </StepLayout>
       );
       break;

@@ -1,12 +1,8 @@
 /** Formes de données partagées entre le parcours (client) et l'API (serveur). */
 
+/** L'immatriculation suffit au garage pour identifier marque, modèle, année et motorisation. */
 export type Vehicle = {
-  type: string;
   fuel: string;
-  brand: string;
-  model: string;
-  year: string;
-  engine: string;
   plate: string;
   mileage: string;
 };
@@ -16,7 +12,6 @@ export type Contact = {
   lastName: string;
   phone: string;
   email: string;
-  consent: boolean;
 };
 
 export type Checks = Record<string, string>;
@@ -31,7 +26,7 @@ export const STATUS_LABELS: Record<RequestStatus, string> = {
   absent: "Pas venu",
 };
 
-/** Une demande enregistrée (créée à l'étape coordonnées, complétée à la réservation). */
+/** Une demande enregistrée (créée à la confirmation, juste avant la réservation du créneau). */
 export type E85Request = {
   id: string;
   createdAt: string;
@@ -40,7 +35,7 @@ export type E85Request = {
   vehicle: Vehicle;
   checks: Checks;
   remark: string;
-  contact: Contact & { consentAt: string };
+  contact: Contact;
   utm: Record<string, string>;
   slotStart: string | null;
   calendarEventId: string | null;

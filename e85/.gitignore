@@ -44,3 +44,4 @@ next-env.d.ts
 # données locales du mode simulé
 /.data
 /node_modules.nosync
+.env*.local

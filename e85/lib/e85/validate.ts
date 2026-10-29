@@ -7,8 +7,6 @@ import type { Checks, Contact, Vehicle } from "./types";
 
 export type Errors = Record<string, string>;
 
-const CURRENT_YEAR = new Date().getFullYear();
-
 /** Normalise un mobile français en +33XXXXXXXXX, ou renvoie null s'il n'est pas valide. */
 export function normalizeMobile(raw: string): string | null {
   const digits = raw.replace(/[\s.\-()]/g, "");
@@ -28,19 +26,13 @@ export function normalizePlate(raw: string) {
   return siv ? `${siv[1]}-${siv[2]}-${siv[3]}` : s;
 }
 
-export function isExitVehicle(v: Pick<Vehicle, "type" | "fuel">) {
-  return e85Service.exitVehicleTypes.includes(v.type) || e85Service.exitFuels.includes(v.fuel);
+export function isExitVehicle(v: Pick<Vehicle, "fuel">) {
+  return e85Service.exitFuels.includes(v.fuel);
 }
 
 export function validateVehicle(v: Vehicle): Errors {
   const e: Errors = {};
-  if (!v.type) e.type = "Choisissez le type de véhicule.";
-  if (!v.fuel) e.fuel = "Choisissez le carburant actuel.";
-  if (!v.brand.trim()) e.brand = "Indiquez la marque.";
-  if (!v.model.trim()) e.model = "Indiquez le modèle.";
-  const year = Number(v.year);
-  if (!year || year < 1980 || year > CURRENT_YEAR + 1) e.year = "Choisissez l'année.";
-  if (!v.engine.trim()) e.engine = "Indiquez la motorisation, par exemple 1.4 TSI 150 ch.";
+  if (!v.fuel) e.fuel = "Choisissez le carburant.";
   const plate = normalizePlate(v.plate);
   if (plate.length < 5 || plate.length > 10) e.plate = "Immatriculation incomplète.";
   const km = Number(v.mileage.replace(/\s/g, ""));
@@ -51,7 +43,7 @@ export function validateVehicle(v: Vehicle): Errors {
 export function validateChecks(c: Checks): Errors {
   const e: Errors = {};
   for (const q of e85Service.checks) {
-    if (!q.choices.some((ch) => ch.value === c[q.id])) e[q.id] = "Choisissez une réponse.";
+    if (!q.choices.some((ch) => ch.value === c[q.id])) e.checks = "Cochez les points qui vous concernent, ou « Aucun ».";
   }
   return e;
 }
@@ -62,7 +54,6 @@ export function validateContact(c: Contact): Errors {
   if (!c.lastName.trim()) e.lastName = "Indiquez votre nom.";
   if (!normalizeMobile(c.phone)) e.phone = "Indiquez un mobile français, par exemple 06 12 34 56 78.";
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(c.email.trim())) e.email = "Adresse e-mail invalide.";
-  if (!c.consent) e.consent = "Cochez la case pour que nous puissions vous recontacter.";
   return e;
 }
 

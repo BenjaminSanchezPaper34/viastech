@@ -18,7 +18,6 @@ const YES_NO: Choice[] = [
   { value: "oui", label: "Oui" },
   { value: "non", label: "Non" },
 ];
-const YES_NO_UNKNOWN: Choice[] = [...YES_NO, { value: "nsp", label: "Je ne sais pas" }];
 
 export const e85Service = {
   id: "e85",
@@ -32,12 +31,6 @@ export const e85Service = {
     "Pose dans notre atelier à Vias",
   ],
 
-  vehicleTypes: [
-    { value: "voiture", label: "Voiture" },
-    { value: "utilitaire", label: "Utilitaire" },
-    { value: "moto", label: "Moto" },
-  ] as Choice[],
-
   fuels: [
     { value: "essence", label: "Essence" },
     { value: "diesel", label: "Diesel" },
@@ -46,7 +39,6 @@ export const e85Service = {
   ] as Choice[],
 
   /** Valeurs qui mènent à l'écran de sortie (pas de réservation). */
-  exitVehicleTypes: ["moto"],
   exitFuels: ["diesel", "hybride", "autre"],
   /** Phrase affichée sur l'écran de sortie, selon le carburant. */
   exitMessages: {
@@ -55,64 +47,14 @@ export const e85Service = {
     autre: "Pour cette motorisation, la réservation en ligne n'est pas possible.",
   } as Record<string, string>,
 
-  brands: [
-    "Audi",
-    "BMW",
-    "Mercedes-Benz",
-    "Volkswagen",
-    "Porsche",
-    "Mini",
-    "Seat",
-    "Cupra",
-    "Skoda",
-    "Peugeot",
-    "Renault",
-    "Citroën",
-    "Dacia",
-    "Ford",
-    "Opel",
-    "Toyota",
-    "Fiat",
-  ],
-
-  /** Questions de l'étape « État du véhicule ». À valider avec le garagiste. */
+  /**
+   * Les seuls points qui peuvent bloquer ou changer la pose. Le client coche ceux qui le concernent
+   * ou répond « Aucun ». Bougies, entretien et ralenti se vérifient à l'atelier. À valider avec le garagiste.
+   */
   checks: [
-    {
-      id: "bougies",
-      label: "Bougies d'allumage changées depuis moins de 30 000 km ?",
-      choices: YES_NO_UNKNOWN,
-      attention: ["non", "nsp"],
-    },
-    {
-      id: "voyant",
-      label: "Voyant moteur allumé ?",
-      choices: YES_NO,
-      attention: ["oui"],
-    },
-    {
-      id: "entretien",
-      label: "Entretien à jour ?",
-      choices: YES_NO_UNKNOWN,
-      attention: ["non"],
-    },
-    {
-      id: "garantie",
-      label: "Véhicule encore sous garantie constructeur ?",
-      choices: YES_NO_UNKNOWN,
-      attention: ["oui"],
-    },
-    {
-      id: "reprog",
-      label: "Moteur déjà reprogrammé ?",
-      choices: YES_NO_UNKNOWN,
-      attention: ["oui"],
-    },
-    {
-      id: "ralenti",
-      label: "Ralenti instable ou à-coups ?",
-      choices: YES_NO,
-      attention: ["oui"],
-    },
+    { id: "voyant", label: "Voyant moteur allumé", choices: YES_NO, attention: ["oui"] },
+    { id: "reprog", label: "Moteur reprogrammé", choices: YES_NO, attention: ["oui"] },
+    { id: "garantie", label: "Sous garantie constructeur", choices: YES_NO, attention: ["oui"] },
   ] as CheckQuestion[],
 };
 

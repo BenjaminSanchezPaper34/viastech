@@ -144,4 +144,4 @@ Le perdant voit « Ce créneau vient d'être réservé » et rechoisit.
 
 - `app/mentions-legales` : raison sociale, forme juridique, capital, SIRET, TVA, dirigeant, médiateur
   (surlignés en rouge sur la page).
-- Questions de l'étape « État du véhicule » (`lib/e85/service.ts`) : à valider avec le garagiste.
+- Points particuliers (voyant moteur, reprogrammation, garantie) dans `lib/e85/service.ts`, et l'immatriculation seule pour identifier le véhicule : à valider avec le garagiste.

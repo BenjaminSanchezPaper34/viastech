@@ -48,7 +48,7 @@ const rows = (pairs: [string, string][]) =>
 function slotPairs(r: E85Request): [string, string][] {
   return [
     ["Rendez-vous", `<strong>${esc(formatSlot(new Date(r.slotStart!)))}</strong>`],
-    ["Véhicule", esc(vehicleTitle(r))],
+    ["Immatriculation", esc(vehicleTitle(r))],
     ["Prestation", `${esc(e85Service.title)} : ${esc(e85Service.priceLabel)}, ${esc(e85Service.offer)}`],
     ["Adresse", `<a href="${mapsUrl}" style="color:#111">${esc(garageAddressLine)}</a>`],
   ];
@@ -57,7 +57,7 @@ function slotPairs(r: E85Request): [string, string][] {
 const slotText = (r: E85Request) =>
   [
     `Rendez-vous : ${formatSlot(new Date(r.slotStart!))}`,
-    `Véhicule : ${vehicleTitle(r)}`,
+    `Immatriculation : ${vehicleTitle(r)}`,
     `Prestation : ${e85Service.title}, ${e85Service.priceLabel}, ${e85Service.offer}`,
     `Adresse : ${garageAddressLine}`,
     `Itinéraire : ${mapsUrl}`,
@@ -135,7 +135,7 @@ export function garageNotification(r: E85Request) {
       ["E-mail", `<a href="mailto:${esc(r.contact.email)}" style="color:#111">${esc(r.contact.email)}</a>`],
     ]) +
       rows(vehicleLines(r).map(([k, v]) => [k, esc(v)])) +
-      `<h2 style="font-size:17px;margin:8px 0 8px">État du véhicule${flagged ? ` (${flagged} point${flagged > 1 ? "s" : ""} à vérifier)` : ""}</h2>` +
+      `<h2 style="font-size:17px;margin:8px 0 8px">Points particuliers${flagged ? ` (${flagged} point${flagged > 1 ? "s" : ""} à vérifier)` : ""}</h2>` +
       rows(
         checks.map((c) => [
           c.label,
@@ -159,7 +159,7 @@ export function garageNotification(r: E85Request) {
     `Client : ${fullName(r)}, ${formatMobile(tel)}, ${r.contact.email}`,
     ...vehicleLines(r).map(([k, v]) => `${k} : ${v}`),
     "",
-    ...checks.map((c) => `${c.attention ? "! " : "- "}${c.label} ${c.answer}`),
+    ...checks.map((c) => `${c.attention ? "! " : "- "}${c.label} : ${c.answer}`),
     r.remark ? `\nRemarque : ${r.remark}` : "",
   ].join("\n");
   return { subject, html, text, replyTo: r.contact.email };
@@ -175,7 +175,7 @@ export function garageCancellation(r: E85Request) {
       ["Créneau libéré", esc(formatSlot(new Date(r.slotStart!)))],
       ["Client", esc(fullName(r))],
       ["Téléphone", `<a href="tel:${tel}" style="color:#111">${esc(formatMobile(tel))}</a>`],
-      ["Véhicule", esc(vehicleTitle(r))],
+      ["Immatriculation", esc(vehicleTitle(r))],
     ]) + p("Le créneau est de nouveau proposé en ligne. L'événement a été retiré de l'agenda."),
   );
   const text = `Annulation : ${fullName(r)} (${formatMobile(tel)}), ${vehicleTitle(r)}, ${formatSlot(
