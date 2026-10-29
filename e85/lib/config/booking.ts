@@ -20,7 +20,7 @@ export const bookingRules = {
    */
   closingTimes: { 1: "17:00", 2: "17:00", 3: "17:00", 4: "17:00", 5: "16:00" } as Record<number, string>,
   /** Nombre maximum de poses par jour (événements « E85 » déjà dans l'agenda compris). */
-  maxPerDay: 2,
+  maxPerDay: 1,
   /** Durée bloquée dans l'agenda pour une pose, en heures. */
   blockHours: 3,
   /** Le client peut annuler en ligne jusqu'à ce nombre d'heures avant le dépôt. */
