@@ -14,7 +14,7 @@ export function BookingSummary({ rows, price, priceNote, footer }: Props) {
     <div className="overflow-hidden rounded-[var(--radius-choice)] border border-border bg-surface">
       {price && (
         <div className="flex items-baseline justify-between gap-3 border-b border-border px-4 py-4">
-          <span className="font-display text-3xl font-bold tracking-[-0.025em] text-accent">{price}</span>
+          <span className="shrink-0 whitespace-nowrap font-display text-3xl font-bold tracking-[-0.025em] text-accent">{price}</span>
           {priceNote && <span className="text-right text-sm text-text">{priceNote}</span>}
         </div>
       )}

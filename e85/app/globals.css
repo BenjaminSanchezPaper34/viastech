@@ -51,6 +51,14 @@ body {
   outline-offset: 3px;
 }
 
+/* Champs de saisie : la bordure verte suffit, le cadre extérieur ferait un double trait. */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 1px var(--color-accent);
+}
+
 /* Le titre reçoit le focus par script à chaque étape (annonce au lecteur d'écran) : pas de cadre visible. */
 .step-title:focus,
 .step-title:focus-visible {

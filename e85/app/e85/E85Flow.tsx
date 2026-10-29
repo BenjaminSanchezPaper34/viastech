@@ -81,6 +81,7 @@ const toChecks = (points: string[]): Checks =>
 const slotDate = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", weekday: "long", day: "numeric", month: "long" });
 const slotHour = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", hour: "2-digit", minute: "2-digit" });
 const fmtDate = (iso: string) => slotDate.format(new Date(iso));
+const capitalize = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
 const fmtHour = (iso: string) =>
   slotHour.format(new Date(iso)).replace(":", "h").replace(/h00$/, "h").replace(/^0/, "");
 
@@ -611,7 +612,7 @@ export function E85Flow() {
         <StepLayout stepKey="confirme" title="Votre rendez-vous est confirmé">
           <BookingSummary
             rows={[
-              ["Date", <strong key="d" className="first-letter:uppercase">{fmtDate(s.slotStart!)}</strong>],
+              ["Date", <strong key="d">{capitalize(fmtDate(s.slotStart!))}</strong>],
               ["Heure de dépôt", <strong key="h">{fmtHour(s.slotStart!)}</strong>],
               [
                 "Adresse",

@@ -27,18 +27,20 @@ export function Stepper({ current, total, onBack }: Props) {
 
   return (
     <header className={headerClass} style={headerStyle}>
-      <div className="mx-auto flex max-w-lg items-center gap-3">
-        <button
-          type="button"
-          onClick={onBack}
-          disabled={!onBack}
-          aria-label="Étape précédente"
-          className="-ml-2 flex size-11 shrink-0 items-center justify-center rounded-full text-text transition-opacity disabled:pointer-events-none disabled:opacity-0"
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="m15 18-6-6 6-6" />
-          </svg>
-        </button>
+      <div className="mx-auto flex min-h-11 max-w-lg items-center gap-3">
+        {/* Pas d'emplacement vide quand il n'y a pas de retour (confirmation) : la barre prend la place. */}
+        {onBack && (
+          <button
+            type="button"
+            onClick={onBack}
+            aria-label="Étape précédente"
+            className="-ml-2 flex size-11 shrink-0 items-center justify-center rounded-full text-text"
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="m15 18-6-6 6-6" />
+            </svg>
+          </button>
+        )}
 
         <div
           className="flex flex-1 gap-1.5"

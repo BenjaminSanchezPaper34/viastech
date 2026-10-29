@@ -16,26 +16,39 @@ type Props = {
 };
 
 export function StepLayout({ kicker, title, intro, children, action, stepKey, hero }: Props) {
+  const heading = (
+    <>
+      {kicker && <p className="mb-2 font-mono text-sm uppercase tracking-[0.16em] text-accent">{kicker}</p>}
+      <h1
+        tabIndex={-1}
+        className="step-title font-display text-[clamp(1.75rem,7vw,2.5rem)] font-semibold leading-[1.1] tracking-[-0.025em] outline-none"
+      >
+        {title}
+      </h1>
+      <span className="line-mark mt-4" aria-hidden="true" />
+    </>
+  );
+
   return (
     <main className="flex flex-1 flex-col px-4">
       <div key={stepKey} className="mx-auto flex w-full max-w-lg flex-1 animate-step-in flex-col pt-4">
-        {hero}
-        <div className={hero ? "relative z-10 -mt-28" : undefined}>
-          {kicker && <p className="mb-2 font-mono text-sm uppercase tracking-[0.16em] text-accent">{kicker}</p>}
-          <h1
-            tabIndex={-1}
-            className="step-title font-display text-[clamp(1.75rem,7vw,2.5rem)] font-semibold leading-[1.1] tracking-[-0.025em] outline-none"
-          >
-            {title}
-          </h1>
-          <span className="line-mark mt-4" aria-hidden="true" />
-        </div>
+        {hero ? (
+          // Le titre est ancré au bas du visuel : quelle que soit sa hauteur (une ou deux lignes),
+          // le contenu qui suit commence sous le visuel et ne passe jamais sous son dégradé.
+          <div className="relative">
+            {hero}
+            <div className="absolute inset-x-0 bottom-0 z-10 pb-1">{heading}</div>
+          </div>
+        ) : (
+          heading
+        )}
         {intro && <div className="mt-4 text-base text-muted">{intro}</div>}
         <div className="mt-6 flex-1">{children}</div>
       </div>
       {action && (
         <div
-          className="sticky bottom-0 z-10 -mx-4 mt-4 border-t border-border bg-bg px-4 pt-3"
+          // Fondu au-dessus de la barre : le texte qui défile dessous s'efface au lieu d'être tranché net.
+          className="sticky bottom-0 z-10 -mx-4 mt-4 bg-bg px-4 pt-3 before:pointer-events-none before:absolute before:inset-x-0 before:-top-8 before:h-8 before:bg-gradient-to-t before:from-bg before:to-transparent"
           style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 16px)" }}
         >
           <div className="mx-auto max-w-lg">{action}</div>

@@ -23,7 +23,8 @@ export const e85Service = {
   id: "e85",
   title: "Conversion E85",
   priceEuros: 420,
-  priceLabel: "420 €",
+  // Espace insécable : « 420 » et « € » ne se séparent jamais en fin de ligne.
+  priceLabel: "420\u00a0€",
   offer: "votre 1er plein offert",
   arguments: [
     "L'E85 coûte environ deux fois moins cher que l'essence",
