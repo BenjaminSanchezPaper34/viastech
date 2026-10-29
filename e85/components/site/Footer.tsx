@@ -10,9 +10,9 @@ export function Footer() {
       className="relative mt-10 border-t border-border px-4 pt-6 text-sm text-muted"
       style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 20px)" }}
     >
-      <div className="mx-auto max-w-lg space-y-1">
+      <div className="mx-auto max-w-lg space-y-1 text-center">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/brand/viastech-logo-blanc.svg" alt={garage.name} width={168} height={40} className="mb-3 h-10 w-auto" />
+        <img src="/brand/viastech-logo-blanc.svg" alt={garage.name} width={168} height={40} className="mx-auto mb-3 h-10 w-auto" />
         {/* Le logo porte déjà la mention « Spécialiste véhicules allemands ». */}
         <p>{garageAddressLine}</p>
         <p>{garage.openingDays}</p>
@@ -28,8 +28,8 @@ export function Footer() {
             {garage.whatsappDisplay}
           </TrackedLink>
         </p>
-        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 pt-5 text-xs">
-          <div className="flex gap-4">
+        <div className="flex flex-col items-center gap-y-3 pt-5 text-xs">
+          <div className="flex justify-center gap-4">
             <Link href="/mentions-legales" className="py-2 underline underline-offset-2">
               Mentions légales
             </Link>
