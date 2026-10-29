@@ -12,6 +12,9 @@
   --color-text: #edeff2;
   --color-muted: #a8afb8;
   --color-danger: #ff5447;
+  /* Plaque d'immatriculation du récapitulatif (fond blanc, bande européenne). */
+  --color-plate: #f4f5f7;
+  --color-plate-band: #1f4fbf;
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-bricolage), var(--font-inter), ui-sans-serif, sans-serif;

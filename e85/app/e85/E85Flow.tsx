@@ -11,6 +11,7 @@ import { BookingSummary } from "@/components/booking/BookingSummary";
 import { ChoiceButtons } from "@/components/booking/ChoiceButtons";
 import { HeroVideo } from "@/components/booking/HeroVideo";
 import { OfferTicket } from "@/components/booking/OfferTicket";
+import { RecapTicket } from "@/components/booking/RecapTicket";
 import { TextArea, TextField } from "@/components/booking/Field";
 import { SlotPicker } from "@/components/booking/SlotPicker";
 import { PrimaryButton, SecondaryLink, StepLayout } from "@/components/booking/StepLayout";
@@ -546,14 +547,13 @@ export function E85Flow() {
           {Notice}
           {s.slotStart && (
             <div className="mb-6">
-              <BookingSummary
+              <RecapTicket
+                slotStart={s.slotStart}
+                blockHours={bookingRules.blockHours}
+                plate={normalizePlate(s.vehicle.plate)}
+                address={garageAddressLine}
                 price={e85Service.priceLabel}
-                priceNote={`Conversion E85, ${e85Service.offer}`}
-                rows={[
-                  ["Dépôt", <strong key="d">{`${fmtDate(s.slotStart)} à ${fmtHour(s.slotStart)}`}</strong>],
-                  ["Immatriculation", normalizePlate(s.vehicle.plate)],
-                  ["Adresse", garageAddressLine],
-                ]}
+                offer={e85Service.offer}
               />
             </div>
           )}
