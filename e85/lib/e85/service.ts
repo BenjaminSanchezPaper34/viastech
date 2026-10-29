@@ -26,6 +26,8 @@ export const e85Service = {
   // Espace insécable : « 420 » et « € » ne se séparent jamais en fin de ligne.
   priceLabel: "420\u00a0€",
   offer: "votre 1er plein offert",
+  /** Rien n'est encaissé en ligne : affiché sur l'accueil, le récapitulatif, la confirmation et l'e-mail. */
+  paymentNote: "Aucun paiement en ligne : vous réglez au garage, au dépôt du véhicule.",
   arguments: [
     "L'E85 coûte environ deux fois moins cher que l'essence",
     "Compatible avec la majorité des véhicules essence",

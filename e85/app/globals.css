@@ -68,15 +68,6 @@ textarea:focus-visible {
   outline: none;
 }
 
-/* Trait vert signature de la charte : un seul par écran, entre le titre et le texte. */
-.line-mark {
-  display: block;
-  width: 64px;
-  height: 3px;
-  border-radius: 1px;
-  background: var(--color-accent);
-}
-
 /* Les écrans ne glissent qu'après une première action du visiteur (voir E85Flow). */
 :not([data-animate]) > main .animate-step-in {
   animation: none;

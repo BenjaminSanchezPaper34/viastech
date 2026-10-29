@@ -29,7 +29,7 @@ choix tactiles, récap avant validation), pas de site vitrine ici
 
 | Nom | Hex | Variable | Rôle |
 |-----|-----|----------|------|
-| Vert ViasTech | `#6bb534` | `--color-accent` | L'unique décision chromatique : bouton principal, choix sélectionné, barre de progression, prix, trait signature. Texte posé dessus : toujours le noir du fond |
+| Vert ViasTech | `#6bb534` | `--color-accent` | L'unique décision chromatique : bouton principal, choix sélectionné, barre de progression, prix. Texte posé dessus : toujours le noir du fond |
 | Noir profond | `#07090A` | `--color-bg` | Fond de page |
 | Surface | `#11151A` | `--color-surface` | Fond des cartes de choix et des champs |
 | Bordure | `#1F2630` | `--color-border` | Bordures des choix et champs au repos |
@@ -57,8 +57,8 @@ fond de section.
 - **Ombres** : aucune. Sur fond noir, la hiérarchie se fait par la surface et la bordure
 - **Espacements** : gouttière 16 px mobile (+ safe areas), 24 px entre blocs, cibles
   tactiles ≥ 52 px de haut, bouton principal pleine largeur collé en bas d'écran
-- **Trait vert signature** (charte) : 64 × 3 px, un seul par écran, entre le titre et le
-  texte. Enchaînement : chapeau mono, titre, trait, texte
+- **Pas de trait sous les titres** (retiré le 29/10/2026 à la demande de Benjamin : tic visuel
+  trop « généré ») : le titre enchaîne directement sur le texte
 - **Logos** : SVG officiels (en-tête, pied de page) ; PNG tirés du SVG pour les e-mails et
   l'aperçu de lien, où le SVG n'est pas lu
 
@@ -68,9 +68,10 @@ fond de section.
 - **Ce qui bouge** : entrée de chaque écran (fondu + 12 px de glissement), remplissage de la
   barre de progression, état sélectionné d'un choix (bordure et fond vert en 150 ms)
 - **Ne bouge jamais** : le prix, le récapitulatif, les messages d'erreur
-- **Effet signature** : la barre de progression est faite de segments en parallélogramme,
-  découpés au même angle que les barres du « V » du logo, qui se remplissent de vert à
-  chaque étape
+- **Progression** (refaite le 29/10/2026) : en-tête « 2/4 · Points particuliers » centré
+  entre le retour et le symbole V, puis une jauge continue qui avance ; elle n'est pleine
+  qu'à la confirmation. Le geste signature du parcours est désormais la carte ticket
+  (offre de l'accueil, récapitulatif des coordonnées)
 - **Scroll lock** : non. **UI d'état (Motion)** : sans objet
 - `prefers-reduced-motion` : toutes les transitions coupées
 

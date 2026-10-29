@@ -72,6 +72,7 @@ export function clientConfirmation(r: E85Request) {
       p("Merci pour votre confiance. Voici le récapitulatif de votre pose E85.") +
       rows(slotPairs(r)) +
       p(`Prévoyez de laisser votre véhicule le temps de la pose, environ ${bookingRules.blockHours} h.`) +
+      p(esc(e85Service.paymentNote)) +
       button(icsUrl(r.id), "Ajouter à mon agenda") +
       p(`Une question ? <a href="${whatsappUrl()}" style="color:#111">Écrivez-nous sur WhatsApp</a>.`) +
       p(
@@ -86,6 +87,7 @@ export function clientConfirmation(r: E85Request) {
     slotText(r),
     "",
     `Prévoyez de laisser votre véhicule le temps de la pose, environ ${bookingRules.blockHours} h.`,
+    e85Service.paymentNote,
     `Ajouter à mon agenda : ${icsUrl(r.id)}`,
     `Une question : ${whatsappUrl()}`,
     `Annuler : ${cancelUrl(r.id)}`,

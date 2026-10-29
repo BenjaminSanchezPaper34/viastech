@@ -13,6 +13,8 @@ type Props = {
   address: string;
   price: string;
   offer: string;
+  /** Mention de paiement, sous le prix. */
+  paymentNote?: string;
 };
 
 const TZ = "Europe/Paris";
@@ -25,7 +27,7 @@ const hour = new Intl.DateTimeFormat("fr-FR", { timeZone: TZ, hour: "2-digit", m
 const cap = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
 const fmtHour = (d: Date) => hour.format(d).replace(":", "h").replace(/h00$/, "h").replace(/^0/, "");
 
-export function RecapTicket({ slotStart, blockHours, plate, address, price, offer }: Props) {
+export function RecapTicket({ slotStart, blockHours, plate, address, price, offer, paymentNote }: Props) {
   const d = new Date(slotStart);
   const [street, ...others] = address.split(", ");
   const rest = others.join(", ");
@@ -87,6 +89,7 @@ export function RecapTicket({ slotStart, blockHours, plate, address, price, offe
           </dd>
         </div>
       </dl>
+      {paymentNote && <p className="border-t border-border px-4 py-3 text-sm text-muted">{paymentNote}</p>}
     </TicketCard>
   );
 }

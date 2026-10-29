@@ -16,7 +16,6 @@ type Props = {
 };
 
 export function StepLayout({ kicker, title, intro, children, action, stepKey, hero }: Props) {
-  // Sur le visuel (accueil), titre centré et sans trait : le prix qui suit fait la transition.
   const heading = (
     <>
       {kicker && <p className="mb-2 font-mono text-sm uppercase tracking-[0.16em] text-accent">{kicker}</p>}
@@ -26,7 +25,6 @@ export function StepLayout({ kicker, title, intro, children, action, stepKey, he
       >
         {title}
       </h1>
-      {!hero && <span className="line-mark mt-4" aria-hidden="true" />}
     </>
   );
 

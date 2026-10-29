@@ -26,7 +26,7 @@ import { track } from "@/lib/track";
 
 type Step = "accueil" | "vehicule" | "sortie" | "points" | "creneau" | "contact" | "confirme";
 
-/** L'accueil n'est pas une étape (0 : en-tête sans barre de progression). */
+/** L'accueil n'est pas une étape (0 : en-tête sans jauge). La confirmation remplit la jauge. */
 const PROGRESS: Record<Step, number> = {
   accueil: 0,
   vehicule: 1,
@@ -34,7 +34,16 @@ const PROGRESS: Record<Step, number> = {
   points: 2,
   creneau: 3,
   contact: 4,
-  confirme: 5,
+  confirme: 4,
+};
+const STEP_LABEL: Record<Step, string> = {
+  accueil: "",
+  vehicule: "Votre véhicule",
+  sortie: "Votre véhicule",
+  points: "Points particuliers",
+  creneau: "Créneau",
+  contact: "Coordonnées",
+  confirme: "Rendez-vous confirmé",
 };
 const PREVIOUS: Partial<Record<Step, Step>> = {
   vehicule: "accueil",
@@ -329,7 +338,8 @@ export function E85Flow() {
             ))}
           </ul>
           <p className="mt-8 text-sm text-muted">
-            1 minute pour vérifier votre véhicule et choisir votre créneau, à partir de {bookingRules.minLeadHours} h.
+            1 minute pour vérifier votre véhicule et choisir votre créneau, à partir de {bookingRules.minLeadHours} h.{" "}
+            {e85Service.paymentNote}
           </p>
         </StepLayout>
       );
@@ -554,6 +564,7 @@ export function E85Flow() {
                 address={garageAddressLine}
                 price={e85Service.priceLabel}
                 offer={e85Service.offer}
+                paymentNote={e85Service.paymentNote}
               />
             </div>
           )}
@@ -625,7 +636,7 @@ export function E85Flow() {
               ],
               ["Prestation", `${e85Service.title}, ${e85Service.priceLabel}, ${e85Service.offer}`],
             ]}
-            footer={`Une confirmation part sur ${s.contact.email}. Un empêchement : le lien d'annulation est dans l'e-mail.`}
+            footer={`${e85Service.paymentNote} Une confirmation part sur ${s.contact.email}. Un empêchement : le lien d'annulation est dans l'e-mail.`}
           />
           <div className="mt-6 space-y-2">
             {s.icsUrl && (
@@ -647,7 +658,7 @@ export function E85Flow() {
 
   return (
     <div className="relative flex flex-1 flex-col" data-animate={navigated ? "" : undefined}>
-      <Stepper current={PROGRESS[s.step]} total={5} onBack={back} />
+      <Stepper current={PROGRESS[s.step]} total={4} label={STEP_LABEL[s.step]} done={s.step === "confirme"} onBack={back} />
       {screen}
       {showFooter && <Footer />}
     </div>
