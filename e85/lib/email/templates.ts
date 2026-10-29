@@ -30,6 +30,8 @@ function layout(title: string, body: string) {
 </table></td></tr></table></body></html>`;
 }
 
+const cap = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
+
 const p = (html: string) => `<p style="margin:0 0 14px;font-size:16px;line-height:1.5">${html}</p>`;
 
 const button = (href: string, label: string) =>
@@ -48,6 +50,7 @@ const rows = (pairs: [string, string][]) =>
 function slotPairs(r: E85Request): [string, string][] {
   return [
     ["Rendez-vous", `<strong>${esc(formatSlot(new Date(r.slotStart!)))}</strong>`],
+    ["Récupération", esc(cap(bookingRules.pickUp))],
     ["Immatriculation", esc(vehicleTitle(r))],
     ["Prestation", `${esc(e85Service.title)} : ${esc(e85Service.priceLabel)}, ${esc(e85Service.offer)}`],
     ["Adresse", `<a href="${mapsUrl}" style="color:#111">${esc(garageAddressLine)}</a>`],
@@ -57,6 +60,7 @@ function slotPairs(r: E85Request): [string, string][] {
 const slotText = (r: E85Request) =>
   [
     `Rendez-vous : ${formatSlot(new Date(r.slotStart!))}`,
+    `Récupération : ${cap(bookingRules.pickUp)}`,
     `Immatriculation : ${vehicleTitle(r)}`,
     `Prestation : ${e85Service.title}, ${e85Service.priceLabel}, ${e85Service.offer}`,
     `Adresse : ${garageAddressLine}`,
@@ -71,7 +75,7 @@ export function clientConfirmation(r: E85Request) {
     p(`Bonjour ${esc(r.contact.firstName)},`) +
       p("Merci pour votre confiance. Voici le récapitulatif de votre pose E85.") +
       rows(slotPairs(r)) +
-      p(`Prévoyez de laisser votre véhicule le temps de la pose, environ ${bookingRules.blockHours} h.`) +
+      p(`Vous déposez votre véhicule à l'heure du rendez-vous et vous le récupérez ${bookingRules.pickUp}.`) +
       p(esc(e85Service.paymentNote)) +
       button(icsUrl(r.id), "Ajouter à mon agenda") +
       p(`Une question ? <a href="${whatsappUrl()}" style="color:#111">Écrivez-nous sur WhatsApp</a>.`) +
@@ -86,7 +90,7 @@ export function clientConfirmation(r: E85Request) {
     "",
     slotText(r),
     "",
-    `Prévoyez de laisser votre véhicule le temps de la pose, environ ${bookingRules.blockHours} h.`,
+    `Vous déposez votre véhicule à l'heure du rendez-vous et vous le récupérez ${bookingRules.pickUp}.`,
     e85Service.paymentNote,
     `Ajouter à mon agenda : ${icsUrl(r.id)}`,
     `Une question : ${whatsappUrl()}`,
@@ -131,6 +135,7 @@ export function garageNotification(r: E85Request) {
     "Nouvelle pose E85 réservée",
     rows([
       ["Dépôt", `<strong>${esc(formatSlot(new Date(r.slotStart!)))}</strong>`],
+      ["Restitution", esc(cap(bookingRules.pickUp))],
       ["Client", esc(fullName(r))],
       ["Téléphone", `<a href="tel:${tel}" style="color:#111;font-weight:bold">${esc(formatMobile(tel))}</a>`],
       ["WhatsApp", `<a href="https://wa.me/${tel.replace("+", "")}" style="color:#111">Ouvrir la conversation</a>`],

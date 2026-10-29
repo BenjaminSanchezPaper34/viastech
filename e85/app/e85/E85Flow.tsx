@@ -494,10 +494,10 @@ export function E85Flow() {
         <StepLayout
           stepKey="creneau"
           title="Choisissez votre créneau"
-          intro={`Vous déposez votre véhicule à l'heure choisie. Comptez environ ${bookingRules.blockHours} h de pose.`}
+          intro={`Vous déposez votre véhicule à ${bookingRules.dropOffTimes.map((t) => t.replace(":", "h").replace(/^0/, "")).join(" ou ")} et vous le récupérez ${bookingRules.pickUp}.`}
           action={
             <PrimaryButton disabled={!s.slotStart} onClick={() => goTo("contact")}>
-              {s.slotStart ? `Continuer avec le ${fmtDate(s.slotStart)} à ${fmtHour(s.slotStart)}` : "Choisissez un jour et une heure"}
+              {s.slotStart ? `Continuer avec le ${fmtDate(s.slotStart)} à ${fmtHour(s.slotStart)}` : bookingRules.dropOffTimes.length > 1 ? "Choisissez un jour et une heure" : "Choisissez un jour"}
             </PrimaryButton>
           }
         >
@@ -534,7 +534,12 @@ export function E85Flow() {
               days={days}
               value={s.slotStart}
               selectedDate={s.selectedDate}
-              onSelectDate={(selectedDate) => patch({ selectedDate, slotStart: null })}
+              onSelectDate={(selectedDate) => {
+                // Un seul dépôt ce jour-là : il est choisi d'office, le client n'a qu'un geste à faire.
+                const daySlots = days.find((d) => d.date === selectedDate)?.slots ?? [];
+                patch({ selectedDate, slotStart: daySlots.length === 1 ? daySlots[0].start : null });
+              }}
+              note={`Vous récupérez votre véhicule ${bookingRules.pickUp}.`}
               onSelectSlot={(slotStart) => patch({ slotStart })}
             />
           )}
@@ -559,7 +564,7 @@ export function E85Flow() {
             <div className="mb-6">
               <RecapTicket
                 slotStart={s.slotStart}
-                blockHours={bookingRules.blockHours}
+                pickUp={bookingRules.pickUp}
                 plate={normalizePlate(s.vehicle.plate)}
                 address={garageAddressLine}
                 price={e85Service.priceLabel}
@@ -628,6 +633,7 @@ export function E85Flow() {
             rows={[
               ["Date", <strong key="d">{capitalize(fmtDate(s.slotStart!))}</strong>],
               ["Heure de dépôt", <strong key="h">{fmtHour(s.slotStart!)}</strong>],
+              ["Récupération", capitalize(bookingRules.pickUp)],
               [
                 "Adresse",
                 <a key="a" href={mapsUrl} onClick={() => track("itineraire")} className="underline underline-offset-2">

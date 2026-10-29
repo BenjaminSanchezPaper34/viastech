@@ -12,6 +12,8 @@ type Props = {
   selectedDate: string | null;
   onSelectDate: (date: string) => void;
   onSelectSlot: (start: string) => void;
+  /** Précision sous les heures (ex. moment de récupération du véhicule). */
+  note?: string;
 };
 
 const utc = (ymd: string) => new Date(`${ymd}T12:00:00Z`);
@@ -32,7 +34,7 @@ function weeks(days: SlotDay[]) {
   return out;
 }
 
-export function SlotPicker({ days, value, selectedDate, onSelectDate, onSelectSlot }: Props) {
+export function SlotPicker({ days, value, selectedDate, onSelectDate, onSelectSlot, note }: Props) {
   const byDate = new Map(days.map((d) => [d.date, d]));
   const selected = selectedDate ? byDate.get(selectedDate) : undefined;
   const hoursRef = useRef<HTMLDivElement>(null);
@@ -101,6 +103,7 @@ export function SlotPicker({ days, value, selectedDate, onSelectDate, onSelectSl
               );
             })}
           </div>
+          {note && <p className="mt-3 text-sm text-muted">{note}</p>}
         </div>
       )}
     </div>

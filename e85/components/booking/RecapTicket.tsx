@@ -7,8 +7,8 @@ import { PinIcon, TicketCard, TicketPerforation } from "./Ticket";
 
 type Props = {
   slotStart: string;
-  /** Durée de pose en heures, affichée sous l'heure de dépôt. */
-  blockHours: number;
+  /** Moment de récupération du véhicule (« l'après-midi »), affiché sous l'heure de dépôt. */
+  pickUp: string;
   plate: string;
   address: string;
   price: string;
@@ -27,7 +27,7 @@ const hour = new Intl.DateTimeFormat("fr-FR", { timeZone: TZ, hour: "2-digit", m
 const cap = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
 const fmtHour = (d: Date) => hour.format(d).replace(":", "h").replace(/h00$/, "h").replace(/^0/, "");
 
-export function RecapTicket({ slotStart, blockHours, plate, address, price, offer, paymentNote }: Props) {
+export function RecapTicket({ slotStart, pickUp, plate, address, price, offer, paymentNote }: Props) {
   const d = new Date(slotStart);
   const [street, ...others] = address.split(", ");
   const rest = others.join(", ");
@@ -47,7 +47,7 @@ export function RecapTicket({ slotStart, blockHours, plate, address, price, offe
             <p className="mt-1 text-base text-text">
               Dépôt à <strong className="text-accent">{fmtHour(d)}</strong>
             </p>
-            <p className="text-sm text-muted">Environ {blockHours} h de pose</p>
+            <p className="text-sm text-muted">Récupération {pickUp}</p>
           </div>
         </div>
       </div>

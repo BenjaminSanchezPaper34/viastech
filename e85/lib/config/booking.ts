@@ -10,12 +10,13 @@ export const bookingRules = {
   horizonDays: 28,
   /** Jours ouvrés : 1 = lundi … 5 = vendredi (0 = dimanche, 6 = samedi). */
   workDays: [1, 2, 3, 4, 5],
-  /** Heures de dépôt du véhicule proposées au client. */
-  dropOffTimes: ["08:30", "14:00"],
+  /** Heures de dépôt du véhicule proposées au client : un seul dépôt, le matin. */
+  dropOffTimes: ["08:30"],
+  /** Moment où le client récupère son véhicule, affiché dans le parcours et les e-mails. */
+  pickUp: "l'après-midi",
   /**
    * Heure de fermeture de l'atelier par jour (horaires du site viastech.fr).
-   * Un dépôt n'est proposé que si la pose se termine avant la fermeture :
-   * le vendredi (16h), le créneau de 14h disparaît donc.
+   * Un dépôt n'est proposé que si la pose se termine avant la fermeture.
    */
   closingTimes: { 1: "17:00", 2: "17:00", 3: "17:00", 4: "17:00", 5: "16:00" } as Record<number, string>,
   /** Nombre maximum de poses par jour (événements « E85 » déjà dans l'agenda compris). */
