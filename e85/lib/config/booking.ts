@@ -19,8 +19,11 @@ export const bookingRules = {
    * Un dépôt n'est proposé que si la pose se termine avant la fermeture.
    */
   closingTimes: { 1: "17:00", 2: "17:00", 3: "17:00", 4: "17:00", 5: "16:00" } as Record<number, string>,
-  /** Nombre maximum de poses par jour (événements « E85 » déjà dans l'agenda compris). */
-  maxPerDay: 1,
+  /**
+   * Nombre maximum de poses par jour (événements « E85 » déjà dans l'agenda compris).
+   * Tous les véhicules sont déposés à la même heure : les poses ne se bloquent pas entre elles.
+   */
+  maxPerDay: 3,
   /** Durée bloquée dans l'agenda pour une pose, en heures. */
   blockHours: 3,
   /** Le client peut annuler en ligne jusqu'à ce nombre d'heures avant le dépôt. */

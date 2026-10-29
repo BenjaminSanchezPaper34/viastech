@@ -1,8 +1,8 @@
 /**
  * Calcul des créneaux libres à partir des règles (lib/config/booking.ts) et de l'agenda.
  * Un créneau est libre si : jour ouvré, non fermé, au moins 48 h après maintenant,
- * pose terminée avant la fermeture de l'atelier, aucun événement ne chevauche la plage
- * bloquée, et la capacité du jour n'est pas atteinte.
+ * pose terminée avant la fermeture de l'atelier, aucun autre événement que les poses ne
+ * chevauche la plage bloquée, et la capacité du jour (maxPerDay) n'est pas atteinte.
  */
 import "server-only";
 import { bookingRules } from "@/lib/config/booking";
@@ -40,7 +40,9 @@ export function computeSlots(events: CalendarEvent[], now = new Date()): SlotDay
         const free =
           start.getTime() >= earliest &&
           end <= closingAt &&
-          !timed.some((e) => e.start.getTime() < end && e.end.getTime() > start.getTime());
+          // Les autres poses E85 ne bloquent pas l'heure (elles sont comptées par maxPerDay) ;
+          // tout autre événement de l'agenda qui chevauche la plage, si.
+          !timed.some((e) => !isPose(e) && e.start.getTime() < end && e.end.getTime() > start.getTime());
         return free ? { time, start: start.toISOString() } : null;
       })
       .filter((s) => s !== null);
