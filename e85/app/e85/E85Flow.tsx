@@ -10,6 +10,7 @@ import { useCallback, useEffect, useState } from "react";
 import { BookingSummary } from "@/components/booking/BookingSummary";
 import { ChoiceButtons } from "@/components/booking/ChoiceButtons";
 import { HeroVideo } from "@/components/booking/HeroVideo";
+import { OfferTicket } from "@/components/booking/OfferTicket";
 import { TextArea, TextField } from "@/components/booking/Field";
 import { SlotPicker } from "@/components/booking/SlotPicker";
 import { PrimaryButton, SecondaryLink, StepLayout } from "@/components/booking/StepLayout";
@@ -300,7 +301,7 @@ export function E85Flow() {
           stepKey="accueil"
           hero={<HeroVideo />}
           kicker="Bioéthanol E85"
-          title="Passez à l'E85 avec Viastech"
+          title="Passez à l'E85"
           action={
             <PrimaryButton
               onClick={() => {
@@ -312,10 +313,12 @@ export function E85Flow() {
             </PrimaryButton>
           }
         >
-          <div className="rounded-[var(--radius-choice)] border border-border bg-surface px-5 py-5">
-            <p className="font-display text-6xl font-bold leading-none tracking-[-0.025em] text-accent">{e85Service.priceLabel}</p>
-            <p className="mt-2 text-lg">la conversion, {e85Service.offer}</p>
-          </div>
+          <OfferTicket
+            label="La conversion"
+            price={e85Service.priceLabel}
+            bonus={capitalize(e85Service.offer)}
+            bonusNote="avec votre conversion"
+          />
           <ul className="mt-6 space-y-4">
             {e85Service.arguments.map((a) => (
               <li key={a} className="flex items-start gap-3 text-base">

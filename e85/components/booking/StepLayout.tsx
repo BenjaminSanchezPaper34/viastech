@@ -16,6 +16,7 @@ type Props = {
 };
 
 export function StepLayout({ kicker, title, intro, children, action, stepKey, hero }: Props) {
+  // Sur le visuel (accueil), titre centré et sans trait : le prix qui suit fait la transition.
   const heading = (
     <>
       {kicker && <p className="mb-2 font-mono text-sm uppercase tracking-[0.16em] text-accent">{kicker}</p>}
@@ -25,7 +26,7 @@ export function StepLayout({ kicker, title, intro, children, action, stepKey, he
       >
         {title}
       </h1>
-      <span className="line-mark mt-4" aria-hidden="true" />
+      {!hero && <span className="line-mark mt-4" aria-hidden="true" />}
     </>
   );
 
@@ -37,7 +38,7 @@ export function StepLayout({ kicker, title, intro, children, action, stepKey, he
           // le contenu qui suit commence sous le visuel et ne passe jamais sous son dégradé.
           <div className="relative">
             {hero}
-            <div className="absolute inset-x-0 bottom-0 z-10 pb-1">{heading}</div>
+            <div className="absolute inset-x-0 bottom-0 z-10 pb-1 text-center">{heading}</div>
           </div>
         ) : (
           heading
