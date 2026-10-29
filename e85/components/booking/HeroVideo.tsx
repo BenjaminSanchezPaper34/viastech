@@ -1,43 +1,68 @@
 "use client";
 /**
  * Vidéo d'atelier en tête de l'accueil : muette, en boucle, lue en ligne sur iPhone.
- * L'affiche (première image) s'affiche tout de suite ; la vidéo n'est pas lancée si le visiteur
- * a demandé moins d'animations ou active l'économiseur de données. Fondu vers le fond en bas
- * pour que le titre se pose dessus.
+ * Pensée pour le téléphone (95 % des visites) :
+ * - l'affiche est une vraie image prioritaire : elle s'affiche tout de suite (LCP) ;
+ * - la vidéo ne se charge qu'une fois la page prête, puis apparaît en fondu quand elle tourne ;
+ * - elle se met en pause hors de l'écran (batterie) ;
+ * - rien n'est lancé si le visiteur demande moins d'animations ou économise ses données.
+ * Le bas est fondu dans le fond de page pour que le titre se pose dessus.
  */
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const POSTER = "/video/e85-hero-poster.webp";
+const VIDEO = "/video/e85-hero.mp4";
 
 export function HeroVideo() {
+  const box = useRef<HTMLDivElement>(null);
   const ref = useRef<HTMLVideoElement>(null);
+  const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
     const video = ref.current;
-    if (!video) return;
+    const el = box.current;
+    if (!video || !el) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
     if (reduced || saveData) return;
-    video.src = video.dataset.src!;
-    video.play().catch(() => {});
+
+    let observer: IntersectionObserver | undefined;
+    const start = () => {
+      video.src = VIDEO;
+      observer = new IntersectionObserver(([entry]) => {
+        if (entry.isIntersecting) video.play().catch(() => {});
+        else video.pause();
+      });
+      observer.observe(el);
+    };
+    // Après le chargement de la page, quand le téléphone a la main libre.
+    const idle = () => ("requestIdleCallback" in window ? requestIdleCallback(start, { timeout: 1500 }) : setTimeout(start, 300));
+    if (document.readyState === "complete") idle();
+    else window.addEventListener("load", idle, { once: true });
+
+    return () => {
+      window.removeEventListener("load", idle);
+      observer?.disconnect();
+    };
   }, []);
 
   return (
     <div
-      className="relative -mx-4 -mt-4 h-[58svh] min-h-[380px] max-h-[620px] overflow-hidden sm:mx-0 sm:rounded-[var(--radius-choice)]"
+      ref={box}
+      className="relative -mx-4 -mt-4 h-[48svh] min-h-[340px] max-h-[560px] overflow-hidden sm:mx-0 sm:rounded-[var(--radius-choice)]"
       aria-hidden="true"
     >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={POSTER} alt="" fetchPriority="high" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
       <video
         ref={ref}
-        data-src="/video/e85-hero.mp4"
-        poster={POSTER}
         muted
         playsInline
         loop
-        autoPlay
         preload="none"
         disablePictureInPicture
-        className="absolute inset-0 h-full w-full object-cover"
+        onPlaying={() => setPlaying(true)}
+        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${playing ? "opacity-100" : "opacity-0"}`}
       />
       {/* Haut assombri pour le symbole, bas fondu dans le fond de page. */}
       <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-bg/80 to-transparent" />

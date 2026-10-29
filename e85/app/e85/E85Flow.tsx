@@ -165,10 +165,11 @@ export function E85Flow() {
     }
   }, []);
 
-  // Chargement des créneaux à l'arrivée sur l'étape (les setState n'ont lieu qu'après la réponse réseau).
+  // Créneaux chargés dès l'écran des points particuliers : le calendrier s'affiche sans attente sur mobile
+  // (les setState n'ont lieu qu'après la réponse réseau).
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (hydrated && s.step === "creneau" && days === null) loadSlots();
+    if (hydrated && (s.step === "points" || s.step === "creneau") && days === null) loadSlots();
   }, [hydrated, s.step, days, loadSlots]);
 
   const setVehicle = (p: Partial<Vehicle>) => {
@@ -189,6 +190,15 @@ export function E85Flow() {
   }, [errors]);
 
   /* ---------- Actions ---------- */
+
+  /** Touche « OK » du clavier du téléphone sur le dernier champ : valide l'écran. */
+  const onEnter = (action: () => void) => (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      (e.target as HTMLInputElement).blur();
+      action();
+    }
+  };
 
   const submitVehicle = () => {
     const e = validateVehicle(s.vehicle);
@@ -342,7 +352,10 @@ export function E85Flow() {
             onChange={(e) => setVehicle({ plate: e.target.value.toUpperCase() })}
             error={errors.plate}
             autoComplete="off"
+            autoCorrect="off"
+            spellCheck={false}
             autoCapitalize="characters"
+            enterKeyHint="next"
           />
           <TextField
             label="Kilométrage"
@@ -351,6 +364,8 @@ export function E85Flow() {
             value={s.vehicle.mileage}
             onChange={(e) => setVehicle({ mileage: e.target.value.replace(/[^\d\s]/g, "") })}
             error={errors.mileage}
+            enterKeyHint="go"
+            onKeyDown={onEnter(submitVehicle)}
           />
         </StepLayout>
       );
@@ -404,7 +419,19 @@ export function E85Flow() {
           title="Un de ces points vous concerne ?"
           intro="Cochez ceux qui s'appliquent à votre véhicule. Le reste, nous le vérifions à l'atelier."
           action={
-            chosen.length > 0 ? <PrimaryButton onClick={openSlots}>Voir les créneaux</PrimaryButton> : undefined
+            chosen.length > 0 ? (
+              <PrimaryButton onClick={openSlots}>Voir les créneaux</PrimaryButton>
+            ) : (
+              // « Aucun » est le cas le plus courant : il est sous le pouce et mène droit au calendrier.
+              <PrimaryButton
+                onClick={() => {
+                  patch({ points: [] });
+                  goTo("creneau");
+                }}
+              >
+                Aucun, voir les créneaux
+              </PrimaryButton>
+            )
           }
         >
           <fieldset className="mb-6" aria-describedby={errors.checks ? "points-err" : undefined}>
@@ -418,18 +445,6 @@ export function E85Flow() {
                   </button>
                 );
               })}
-              <button
-                type="button"
-                aria-pressed={s.points !== null && chosen.length === 0}
-                onClick={() => {
-                  // « Aucun » : le cas le plus courant passe directement au calendrier.
-                  patch({ points: [] });
-                  goTo("creneau");
-                }}
-                className={`${tile(s.points !== null && chosen.length === 0)} mt-2`}
-              >
-                Aucun, voir les créneaux
-              </button>
             </div>
             {errors.checks && (
               <p id="points-err" className="mt-2 text-sm text-danger">
@@ -541,6 +556,8 @@ export function E85Flow() {
           <TextField
             label="Prénom"
             autoComplete="given-name"
+            autoCapitalize="words"
+            enterKeyHint="next"
             value={s.contact.firstName}
             onChange={(e) => patch({ contact: { ...s.contact, firstName: e.target.value } })}
             error={errors.firstName}
@@ -548,6 +565,8 @@ export function E85Flow() {
           <TextField
             label="Nom"
             autoComplete="family-name"
+            autoCapitalize="words"
+            enterKeyHint="next"
             value={s.contact.lastName}
             onChange={(e) => patch({ contact: { ...s.contact, lastName: e.target.value } })}
             error={errors.lastName}
@@ -557,6 +576,7 @@ export function E85Flow() {
             type="tel"
             inputMode="tel"
             autoComplete="tel"
+            enterKeyHint="next"
             placeholder="06 12 34 56 78"
             value={s.contact.phone}
             onChange={(e) => patch({ contact: { ...s.contact, phone: e.target.value } })}
@@ -571,6 +591,9 @@ export function E85Flow() {
             value={s.contact.email}
             onChange={(e) => patch({ contact: { ...s.contact, email: e.target.value } })}
             error={errors.email}
+            autoCapitalize="none"
+            enterKeyHint="send"
+            onKeyDown={onEnter(confirm)}
           />
           <p className="mt-1 text-sm text-muted">
             Vous recevez la confirmation par e-mail, puis un rappel la veille. Vos coordonnées servent uniquement à ce
