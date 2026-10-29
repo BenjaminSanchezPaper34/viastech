@@ -3,18 +3,29 @@
  * (segments en parallélogramme, coupés au même angle que les barres du « V » Viastech).
  */
 type Props = {
-  /** Étape courante, à partir de 1. */
+  /** Étape courante, à partir de 1 ; 0 sur l'accueil : logo seul, sans bouton retour ni barre. */
   current: number;
   total: number;
   onBack?: () => void;
 };
 
 export function Stepper({ current, total, onBack }: Props) {
+  const headerClass = "sticky top-0 z-20 bg-bg/95 px-4 pb-3 backdrop-blur-sm";
+  const headerStyle = { paddingTop: "calc(env(safe-area-inset-top) + 10px)" };
+
+  if (current === 0) {
+    return (
+      <header className={headerClass} style={headerStyle}>
+        <div className="mx-auto flex h-11 max-w-lg items-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/brand/viastech-logo-blanc.svg" alt="Viastech" width={134} height={32} className="h-8 w-auto" />
+        </div>
+      </header>
+    );
+  }
+
   return (
-    <header
-      className="sticky top-0 z-20 bg-bg/95 px-4 pb-3 backdrop-blur-sm"
-      style={{ paddingTop: "calc(env(safe-area-inset-top) + 10px)" }}
-    >
+    <header className={headerClass} style={headerStyle}>
       <div className="mx-auto flex max-w-lg items-center gap-3">
         <button
           type="button"

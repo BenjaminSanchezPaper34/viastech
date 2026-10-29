@@ -23,14 +23,15 @@ import { track } from "@/lib/track";
 
 type Step = "accueil" | "vehicule" | "sortie" | "points" | "creneau" | "contact" | "confirme";
 
+/** L'accueil n'est pas une étape (0 : en-tête sans barre de progression). */
 const PROGRESS: Record<Step, number> = {
-  accueil: 1,
-  vehicule: 2,
-  sortie: 2,
-  points: 3,
-  creneau: 4,
-  contact: 5,
-  confirme: 6,
+  accueil: 0,
+  vehicule: 1,
+  sortie: 1,
+  points: 2,
+  creneau: 3,
+  contact: 4,
+  confirme: 5,
 };
 const PREVIOUS: Partial<Record<Step, Step>> = {
   vehicule: "accueil",
@@ -617,7 +618,7 @@ export function E85Flow() {
 
   return (
     <div className="flex flex-1 flex-col" data-animate={navigated ? "" : undefined}>
-      <Stepper current={PROGRESS[s.step]} total={6} onBack={back} />
+      <Stepper current={PROGRESS[s.step]} total={5} onBack={back} />
       {screen}
       {showFooter && <Footer />}
     </div>
