@@ -16,9 +16,9 @@ export function Stepper({ current, total, onBack }: Props) {
   if (current === 0) {
     return (
       <header className={headerClass} style={headerStyle}>
-        <div className="mx-auto flex h-11 max-w-lg items-center">
+        <div className="mx-auto flex h-11 max-w-lg items-center justify-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/brand/viastech-logo-blanc.svg" alt="Viastech" width={134} height={32} className="h-8 w-auto" />
+          <img src="/brand/viastech-symbole-blanc.svg" alt="Viastech" width={31} height={26} className="h-[26px] w-auto" />
         </div>
       </header>
     );
