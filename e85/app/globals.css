@@ -51,6 +51,12 @@ body {
   outline-offset: 3px;
 }
 
+/* Le titre reçoit le focus par script à chaque étape (annonce au lecteur d'écran) : pas de cadre visible. */
+.step-title:focus,
+.step-title:focus-visible {
+  outline: none;
+}
+
 /* Trait vert signature de la charte : un seul par écran, entre le titre et le texte. */
 .line-mark {
   display: block;
