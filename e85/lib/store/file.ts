@@ -1,7 +1,9 @@
 /** Stockage local (.data/requests.json) quand DATABASE_URL est absent. Mêmes règles que Postgres. */
 import { randomUUID } from "node:crypto";
 import { assertLocalStorageAllowed, readJson, updateJson } from "@/lib/jsonfile";
+import { bookingRules } from "@/lib/config/booking";
 import type { E85Request } from "@/lib/e85/types";
+import { parisParts } from "@/lib/time";
 import { SlotTakenError, type RequestStore } from "./types";
 
 const FILE = "requests";
@@ -46,7 +48,9 @@ export function fileStore(): RequestStore {
 
     reserve(id, slotStart) {
       return updateJson(FILE, empty, (all) => {
-        if (all.some((r) => r.status === "reserve" && r.slotStart === slotStart)) throw new SlotTakenError();
+        const day = parisParts(new Date(slotStart)).ymd;
+        const taken = all.filter((r) => r.status === "reserve" && r.slotStart && parisParts(new Date(r.slotStart)).ymd === day);
+        if (taken.length >= bookingRules.maxPerDay) throw new SlotTakenError();
         const r = all.find((x) => x.id === id && x.status === "incomplet");
         if (!r) throw new Error("Demande introuvable ou déjà réservée.");
         Object.assign(r, { status: "reserve", slotStart, updatedAt: now() });

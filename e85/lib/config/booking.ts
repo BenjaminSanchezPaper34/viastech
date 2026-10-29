@@ -23,7 +23,7 @@ export const bookingRules = {
    * Nombre maximum de poses par jour (événements « E85 » déjà dans l'agenda compris).
    * Tous les véhicules sont déposés à la même heure : les poses ne se bloquent pas entre elles.
    */
-  maxPerDay: 3,
+  maxPerDay: 2,
   /** Durée bloquée dans l'agenda pour une pose, en heures. */
   blockHours: 3,
   /** Le client peut annuler en ligne jusqu'à ce nombre d'heures avant le dépôt. */

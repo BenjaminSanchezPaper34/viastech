@@ -1,10 +1,12 @@
 /**
  * Stockage Postgres (Neon). La table est créée au premier appel.
- * L'index unique partiel sur slot_start garantit qu'un créneau ne peut être réservé
- * qu'une fois, même si deux clients confirment à la même seconde.
+ * Tous les véhicules sont déposés à la même heure : la réservation est refusée en base
+ * dès que le jour compte déjà bookingRules.maxPerDay poses, même si deux clients
+ * confirment à la même seconde.
  */
 import { randomUUID } from "node:crypto";
 import { neon } from "@neondatabase/serverless";
+import { bookingRules } from "@/lib/config/booking";
 import type { E85Request } from "@/lib/e85/types";
 import { SlotTakenError, type RequestStore } from "./types";
 
@@ -64,9 +66,8 @@ export function postgresStore(url: string): RequestStore {
           reminder_sent_at timestamptz,
           cancelled_at timestamptz
         )`;
-      await sql`
-        CREATE UNIQUE INDEX IF NOT EXISTS e85_requests_slot_active
-        ON e85_requests (slot_start) WHERE status = 'reserve'`;
+      // Ancien verrou « une réservation par heure », incompatible avec plusieurs dépôts à 8h30.
+      await sql`DROP INDEX IF EXISTS e85_requests_slot_active`;
     })());
 
   const one = async (rows: unknown) => {
@@ -109,6 +110,16 @@ export function postgresStore(url: string): RequestStore {
           UPDATE e85_requests SET status = 'reserve', slot_start = ${slotStart}, updated_at = now()
           WHERE id = ${id} AND status = 'incomplet' RETURNING *`);
         if (!r) throw new Error("Demande introuvable ou déjà réservée.");
+        // Plafond du jour (heure de Paris) : au-delà, on rend la demande et on signale le créneau pris.
+        const [{ n }] = (await sql`
+          SELECT count(*)::int AS n FROM e85_requests WHERE status = 'reserve'
+          AND (slot_start AT TIME ZONE 'Europe/Paris')::date = (${slotStart}::timestamptz AT TIME ZONE 'Europe/Paris')::date`) as {
+          n: number;
+        }[];
+        if (n > bookingRules.maxPerDay) {
+          await sql`UPDATE e85_requests SET status = 'incomplet', slot_start = NULL, updated_at = now() WHERE id = ${id}`;
+          throw new SlotTakenError();
+        }
         return r;
       } catch (e) {
         if ((e as { code?: string }).code === "23505") throw new SlotTakenError();

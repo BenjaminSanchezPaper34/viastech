@@ -1,7 +1,7 @@
 /**
  * Les deux opérations métier : réserver un créneau et annuler un rendez-vous.
- * Ordre de la réservation : revérifier l'agenda, verrouiller le créneau en base
- * (index unique), créer l'événement, puis envoyer les e-mails après la réponse.
+ * Ordre de la réservation : revérifier l'agenda, verrouiller la place en base
+ * (plafond de poses par jour), créer l'événement, puis envoyer les e-mails après la réponse.
  */
 import "server-only";
 import { after } from "next/server";
